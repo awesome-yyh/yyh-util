@@ -1,0 +1,24 @@
+aslog/log.txt
+.__pycache__
+.DS_Store
+node_modules/
+search_db/
+app/package-lock.json
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+selenium-debug.log
+venv/
+
+# Editor directories and files
+.idea
+.metals
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+log/
+data/
+
+*/__pycache__
