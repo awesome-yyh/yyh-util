@@ -47,4 +47,4 @@ class RedisSingle:
         cacheValue (str): redis value
         ex (str, optional): 过期时间. Defaults to 60*60.
     """
-    self.__redis.set(cachekey, cacheValue)
+    self.__redis.set(cachekey, cacheValue,ex=ex)
