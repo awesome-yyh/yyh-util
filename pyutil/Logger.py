@@ -54,3 +54,14 @@ class Logger:
                                                           encoding='utf-8')
             th.setFormatter(format_str) 
             self.logger.addHandler(th)
+
+# 用法：
+if __name__ == "__main__":
+    log = Logger("log/testLog.log")
+    log.logger.info("okkk")
+    log.logger.warning("warning")
+    log.logger.error("error")
+
+    
+    log_error = Logger("log/testLogerr.log", level='error')
+    log_error.logger.error("errr")
