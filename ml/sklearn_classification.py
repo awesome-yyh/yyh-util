@@ -11,7 +11,7 @@ label = iris.target
 x_train, x_test, y_train, y_test = train_test_split(data, label, 
                                 test_size=0.2, random_state=1)
 
-# 特征工程
+# 数据处理
 # print(type(x_train), x_train.shape)
 # import matplotlib.pyplot as plt
 # plt.subplot(2, 2, 1)
@@ -151,3 +151,7 @@ model.fit(x_train, y_train)
 pred = model.predict(x_test)
 metric = numpy.sqrt(sklearn.metrics.mean_squared_error(y_test, pred))
 print(f"GBDT分类, 均方误差: {metric}")
+print(f"特征重要度: {model.feature_importances_}")
+from matplotlib import pyplot
+pyplot.bar(range(len(model.feature_importances_)), model.feature_importances_)
+pyplot.show()

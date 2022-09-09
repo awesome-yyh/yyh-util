@@ -1,4 +1,4 @@
-from .base_model import *
+# from .base_model import *
 import xgboost as xgb
 
 # 模型调优五部曲：
@@ -66,3 +66,23 @@ class XGBModel(BaseModel):
     def load(self, path):
         self.model = xgb.Booster({'nthread': 8})
         self.model.load_model(path)
+
+
+# plot feature importance manually
+from numpy import loadtxt
+from xgboost import XGBClassifier
+from matplotlib import pyplot
+from sklearn.datasets import load_iris
+# load data
+dataset = load_iris()
+# split data into X and y
+X = dataset.data
+y = dataset.target
+# fit model no training data
+model = XGBClassifier()
+model.fit(X, y)
+# feature importance
+print(model.feature_importances_)
+# plot
+pyplot.bar(range(len(model.feature_importances_)), model.feature_importances_)
+pyplot.show()

@@ -11,7 +11,7 @@ label = iris.target
 x_train, x_test, y_train, y_test = train_test_split(data, label, 
                                 test_size=0.2, random_state=1)
 
-# # 特征工程
+# # 数据处理
 # import matplotlib.pyplot as plt
 # plt.subplot(2, 2, 1)
 # plt.plot(x_train[:, 0], y_train, 'ro', label='train')
