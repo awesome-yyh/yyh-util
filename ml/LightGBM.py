@@ -15,13 +15,9 @@ params = {
     'verbose': 1  # <0 显示致命的, =0 显示错误 (警告), >0 显示信息
 }
 
-
-
 # 数据预处理
 train_data = lgb.Dataset(X_train, label=y_train) # 训练集
 validation_data = lgb.Dataset(X_test, label=y_test, reference=train_data) # 验证集
-
-
 
 # 训练和评估
 # 模型训练
