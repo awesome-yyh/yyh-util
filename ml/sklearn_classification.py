@@ -55,10 +55,7 @@ pred = model.predict(x_test)
 # print(model) # 查看模型
 # print(model.coef_) # 查看模型的最佳拟合曲线各变量的参数
 # print(model.intercept_) # 查看模型的最佳拟合曲线的截距（常数项）
-print ('ACC: %.4f' % sklearn.metrics.accuracy_score(y_test, pred))
-metric = numpy.sqrt(sklearn.metrics.mean_squared_error(y_test, pred))
-print(f"逻辑回归, 均方误差: {metric}")
-print(sklearn.metrics.confusion_matrix(y_test, pred)) # 对于分类问题，查看正确率和混淆矩阵，斜对角线都是预测对的数
+print ('LR ACC: %.4f' % sklearn.metrics.accuracy_score(y_test, pred))
 
 ####2.SVM分类####
 from sklearn import svm
@@ -75,59 +72,49 @@ verbose=False, # False代表静默模式
 max_iter=-1) # 默认设置为-1，表示无穷大迭代次数
 model.fit(x_train, y_train)
 pred = model.predict(x_test)
-metric = numpy.sqrt(sklearn.metrics.mean_squared_error(y_test, pred))
-print ('ACC: %.4f' % sklearn.metrics.accuracy_score(y_test, pred))
-print(f"SVM分类, 均方误差: {metric}")
+print ('SMV ACC: %.4f' % sklearn.metrics.accuracy_score(y_test, pred))
 
 ####3.KNN分类####
 from sklearn import neighbors
 model = neighbors.KNeighborsClassifier()
 model.fit(x_train, y_train)
 pred = model.predict(x_test)
-metric = numpy.sqrt(sklearn.metrics.mean_squared_error(y_test, pred))
-print ('ACC: %.4f' % sklearn.metrics.accuracy_score(y_test, pred))
-print(f"KNN分类, 均方误差: {metric}")
-
+print ('KNN ACC: %.4f' % sklearn.metrics.accuracy_score(y_test, pred))
 
 ####4.朴素贝叶斯分类####
 from sklearn.naive_bayes import GaussianNB
 model = GaussianNB()
 model.fit(x_train, y_train)
 pred = model.predict(x_test)
-metric = numpy.sqrt(sklearn.metrics.mean_squared_error(y_test, pred))
-print(f"朴素贝叶斯分类, 均方误差: {metric}")
+print ('朴素贝叶斯分类 ACC: %.4f' % sklearn.metrics.accuracy_score(y_test, pred))
 
 ####5.Bagging分类####
 from sklearn.ensemble import BaggingClassifier
 model = BaggingClassifier()
 model.fit(x_train, y_train)
 pred = model.predict(x_test)
-metric = numpy.sqrt(sklearn.metrics.mean_squared_error(y_test, pred))
-print(f"Bagging分类, 均方误差: {metric}")
+print ('Bagging分类 ACC: %.4f' % sklearn.metrics.accuracy_score(y_test, pred))
 
 ####6.决策树分类####
 from sklearn import tree
 model = tree.DecisionTreeClassifier()
 model.fit(x_train, y_train)
 pred = model.predict(x_test)
-metric = numpy.sqrt(sklearn.metrics.mean_squared_error(y_test, pred))
-print(f"决策树分类, 均方误差: {metric}")
+print ('决策树分类 ACC: %.4f' % sklearn.metrics.accuracy_score(y_test, pred))
 
 ####7.随机森林分类#### Bagging + 决策树 = 随机森林
 from sklearn import ensemble
 model = ensemble.RandomForestClassifier(n_estimators=20)#这里使用20个决策树
 model.fit(x_train, y_train)
 pred = model.predict(x_test)
-metric = numpy.sqrt(sklearn.metrics.mean_squared_error(y_test, pred))
-print(f"随机森林分类, 均方误差: {metric}")
+print ('随机森林分类 ACC: %.4f' % sklearn.metrics.accuracy_score(y_test, pred))
 
 ####8.Adaboost分类####
 from sklearn import ensemble
 model = ensemble.AdaBoostClassifier(n_estimators=50)#这里使用50个决策树
 model.fit(x_train, y_train)
 pred = model.predict(x_test)
-metric = numpy.sqrt(sklearn.metrics.mean_squared_error(y_test, pred))
-print(f"Adaboost分类, 均方误差: {metric}")
+print ('Adaboost分类 ACC: %.4f' % sklearn.metrics.accuracy_score(y_test, pred))
 
 ####9.GBDT分类####
 from sklearn import ensemble
@@ -149,9 +136,9 @@ ccp_alpha=0)
 
 model.fit(x_train, y_train)
 pred = model.predict(x_test)
-metric = numpy.sqrt(sklearn.metrics.mean_squared_error(y_test, pred))
-print(f"GBDT分类, 均方误差: {metric}")
-print(f"特征重要度: {model.feature_importances_}")
+print ('GBDT分类 ACC: %.4f' % sklearn.metrics.accuracy_score(y_test, pred))
+
+print(f"GBDT特征重要度: {model.feature_importances_}")
 from matplotlib import pyplot
 pyplot.bar(range(len(model.feature_importances_)), model.feature_importances_)
 pyplot.show()
