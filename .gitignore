@@ -10,6 +10,7 @@ yarn-error.log*
 selenium-debug.log
 venv/
 model/
+models/
 logs/
 # Editor directories and files
 .idea
