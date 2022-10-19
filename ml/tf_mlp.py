@@ -33,11 +33,15 @@ from sklearn.model_selection import train_test_split
 mnist = tf.keras.datasets.mnist
 (training_images, training_labels), (test_images, test_labels) = mnist.load_data()
 
+# 探索性数据分析
+
 # 数据清洗
 
-# 特征工程
+# 数据变换
 training_images = training_images/255.0
 test_images = test_images/255.0
+
+# 特征工程
 
 # 划分训练集、验证集、测试集
 training_images, val_images, training_labels, val_labels = train_test_split(
