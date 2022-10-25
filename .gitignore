@@ -22,5 +22,5 @@ logs/
 *.sln
 log/
 data/
-
+./data
 */__pycache__

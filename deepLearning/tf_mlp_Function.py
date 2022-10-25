@@ -29,23 +29,30 @@ from sklearn.model_selection import train_test_split
 # df.write.mode("overwrite").format("tfrecord").option("recordType", "Example").save("/Users/yaheyang/ss") # spark 写tfrecord
 
 # 方式二：使用numpy、pandas、matplotlib对数据读取、清洗、特征工程、划分，最后存储为TFRecord
+
 # 数据读取
 mnist = tf.keras.datasets.mnist
 (training_images, training_labels), (test_images, test_labels) = mnist.load_data()
 
-# 探索性数据分析
+
+# 数据探索分析
+
 
 # 数据清洗
+
 
 # 数据变换
 training_images = training_images/255.0
 test_images = test_images/255.0
 
+
 # 特征工程
+
 
 # 划分训练集、验证集、测试集
 training_images, val_images, training_labels, val_labels = train_test_split(
     training_images, training_labels, test_size=0.2, random_state=1, stratify=training_labels)
+
 
 # 存储为TFRecord
 tfrecords_path = "./data/mlptfrecord/train.tfrecords"
@@ -81,15 +88,25 @@ def read_tfrecords():
 
 
 # 搭建模型
-model = tf.keras.models.Sequential()
-model.add(tf.keras.layers.Flatten(input_shape=(28, 28)))
-model.add(tf.keras.layers.Dense(128, activation=tf.nn.relu))
-model.add(tf.keras.layers.Dropout(0.5))
-model.add(tf.keras.layers.Dense(10, activation=tf.nn.softmax))
+inputs = tf.keras.Input(shape=(28,28), name="my_input")
+flatten = tf.keras.layers.Flatten()(inputs)
+dense = tf.keras.layers.Dense(128, activation="relu",
+                        kernel_regularizer=tf.keras.regularizers.L2(0.002), # 对该层的权重正则
+                        activity_regularizer=tf.keras.regularizers.L2(0))(flatten) # 对该层的输出矩阵正则
+dense = tf.keras.layers.Dropout(0.5)(dense)
+outputs = tf.keras.layers.Dense(10, activation="softmax")(dense)
+model = tf.keras.Model(inputs=inputs, outputs=outputs)
 
+# 查看模型结构
+# model.build((None,))
+model.summary()
+tf.keras.utils.plot_model(model, "model.png", show_shapes=True)
+
+# 定义损失函数及优化器
 model.compile(optimizer = tf.keras.optimizers.Adam(learning_rate=1e-3), 
               loss = tf.keras.losses.sparse_categorical_crossentropy, 
               metrics=['accuracy'])
+
 
 # 训练模型
 # early_stopping
@@ -126,16 +143,40 @@ if os.path.exists(ckpt_file_path):
 history = model.fit(training_images, training_labels, 
                     validation_data = (val_images, val_labels),
                     callbacks=[early_stopping, tensorboard_callback, cp_callback],
-                    epochs=3, verbose=2)
+                    batch_size = 128, epochs=3, verbose=2)
 
-# 画图（训练误差、验证误差），分析过拟合欠拟合，并调整超参数改进模型
-model.summary()
+
+# 模型评估和改进
 # > tensorboard --logdir logs/mlp
+import matplotlib.pyplot as plt
+history_dict = history.history
+loss_values = history_dict["loss"]
+val_loss_values = history_dict["val_loss"]
+epochs = range(1, len(loss_values) + 1)
+plt.subplot(121)
+plt.plot(epochs, loss_values, "bo", label="Training loss")
+plt.plot(epochs, val_loss_values, "b", label="Validation loss")
+plt.title("Training and validation loss")
+plt.xlabel("Epochs")
+plt.ylabel("Loss")
+plt.legend()
 
-# 模型评估（测试误差）
+plt.subplot(122)
+acc = history_dict["accuracy"]
+val_acc = history_dict["val_accuracy"]
+plt.plot(epochs, acc, "bo", label="Training acc")
+plt.plot(epochs, val_acc, "b", label="Validation acc")
+plt.title("Training and validation accuracy")
+plt.xlabel("Epochs")
+plt.ylabel("Accuracy")
+plt.legend()
+plt.show()
+
 test_loss, test_acc = model.evaluate(test_images, test_labels, verbose=2)
 print("在测试集的准确率: ", test_acc)
 
+
+# 模型保存加载和部署
 # 模型加载和预测(ckpt)
 if os.path.exists(ckpt_file_path):
     model.load_weights(ckpt_file_path)
@@ -157,3 +198,8 @@ print(f"第一张图片的真实值: {test_labels[0]}")
 # restored_saved_model.get_layer("dense_1").kernel # 查看模型参数
 
 # 最后使用docker-tf-serving部署pb文件的模型，即可使用http在线访问预测
+
+import matplotlib.pyplot as plt
+digit = test_images[0]
+plt.imshow(digit, cmap=plt.cm.binary)
+plt.show()

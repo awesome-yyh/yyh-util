@@ -102,6 +102,10 @@ print("xgb的最佳参数: ", study.best_trial.params) # 获取最佳参数
 clf = XGBClassifier(**(study.best_trial.params))
 clf.fit(X_train, y_train, eval_set=[(X_test, y_test)], verbose=False)
 
+# for importance_type in ('weight', 'gain', 'cover', 'total_gain', 'total_cover'):
+#     print('%s: ' % importance_type, clf.get_booster().get_score(importance_type=importance_type))
+# gblinear only has `weight` defined for feature importance.
+
 print("evals_result:", clf.evals_result())
 
 print("显示数据特征重要度: ", clf.feature_importances_)
