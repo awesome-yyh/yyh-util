@@ -10,6 +10,7 @@ print("Tensorflow version: ", tf.__version__)
 print("Tensorflow is built with CUDA: ", tf.test.is_built_with_cuda())
 print("Tensorflow path: \n", tf.__path__)
 print("CPU or GPU: \n", device_lib.list_local_devices())
+print(tf.config.list_physical_devices('GPU'))
 
 A = tf.constant([[1, 2], [3, 4]])
 B = tf.constant([[5, 6], [7, 8]])
@@ -51,9 +52,10 @@ train_x, test_x, train_y, test_y = train_test_split(xs, ys, test_size=0.2, rando
 
 # 搭建模型
 x = tf.keras.Input(shape=(1,))
-y = tf.keras.layers.Dense(units=1, activation=None,
-                        kernel_initializer=tf.zeros_initializer(),
-                        bias_initializer=tf.zeros_initializer())(x)
+y = tf.keras.layers.Attention(use_scale=True)([x, x])
+# y = tf.keras.layers.Dense(units=1, activation=None,
+#                         kernel_initializer=tf.zeros_initializer(),
+#                         bias_initializer=tf.zeros_initializer())(x)
 model = tf.keras.Model(inputs=x, outputs=y)
 
 # 查看模型结构

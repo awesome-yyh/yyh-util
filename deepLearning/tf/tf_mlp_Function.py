@@ -90,11 +90,12 @@ def read_tfrecords():
 # 搭建模型
 inputs = tf.keras.Input(shape=(28,28), name="my_input")
 flatten = tf.keras.layers.Flatten()(inputs)
-dense = tf.keras.layers.Dense(128, activation="relu",
+x = tf.keras.layers.Dense(128, activation="relu",
                         kernel_regularizer=tf.keras.regularizers.L2(0.002), # 对该层的权重正则
                         activity_regularizer=tf.keras.regularizers.L2(0))(flatten) # 对该层的输出矩阵正则
-dense = tf.keras.layers.Dropout(0.5)(dense)
-outputs = tf.keras.layers.Dense(10, activation="softmax")(dense)
+x = tf.keras.layers.BatchNormalization()(x)
+x = tf.keras.layers.Dropout(0.5)(x)
+outputs = tf.keras.layers.Dense(10, activation="softmax")(x)
 model = tf.keras.Model(inputs=inputs, outputs=outputs)
 
 # 查看模型结构

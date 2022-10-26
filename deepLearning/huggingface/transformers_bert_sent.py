@@ -1,3 +1,4 @@
+import time
 import torch
 import numpy as np
 from sentence_transformers import SentenceTransformer, util
@@ -12,9 +13,12 @@ def get_cos_similar_multi(v1: list, v2: list):
 
 pretrained_model_name = 'sentence-transformers/distiluse-base-multilingual-cased-v2'
 model = SentenceTransformer(pretrained_model_name) # 会自动下载模型
-
+t1 = time.time()
 query_embedding = model.encode('北京')
+t2 = time.time()
+print(t2-t1)
 docs_embedding = model.encode(['长白山','故宫', '北京故宫', '北京'])
+print(time.time()-t2)
 
 print(query_embedding.shape)
 print(docs_embedding.shape)

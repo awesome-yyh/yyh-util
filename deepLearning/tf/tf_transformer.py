@@ -12,18 +12,6 @@ import tensorflow as tf
 # !tar -xf aclImdb_v1.tar.gz
 # !rm -r aclImdb/train/unsup
 
-# 数据探索分析
-
-# 数据清洗
-
-# 数据变换
-# raw_data = preprocessing.StandardScaler().fit_transform(raw_data)
-
-# 特征工程
-
-# 划分训练集、验证集、测试集
-batch_size = 32
-
 base_dir = pathlib.Path("data/aclImdb")
 val_dir = base_dir / "val"
 train_dir = base_dir / "train"
@@ -37,6 +25,17 @@ for category in ("neg", "pos"):
         shutil.move(train_dir / category / fname,
                     val_dir / category / fname)
 
+# 数据探索分析
+
+# 数据清洗
+
+# 数据变换
+# raw_data = preprocessing.StandardScaler().fit_transform(raw_data)
+
+# 特征工程
+
+# 划分训练集、验证集、测试集
+batch_size = 32
 train_ds = tf.keras.utils.text_dataset_from_directory(
     "data/aclImdb/train", batch_size=batch_size
 )
@@ -132,11 +131,11 @@ class TransformerEncoder(tf.keras.layers.Layer):
         })
         return config
 
-vocab_size = 20000
 sequence_length = 600
+vocab_size = 20000
 embed_dim = 256
-num_heads = 2
 dense_dim = 32
+num_heads = 2
 
 inputs = tf.keras.Input(shape=(None,), dtype="int64")
 x = PositionalEmbedding(sequence_length, vocab_size, embed_dim)(inputs)
