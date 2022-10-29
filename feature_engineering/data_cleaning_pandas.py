@@ -1,6 +1,6 @@
-# import pandas as pd
+import pandas as pd
 
-# df = pd.read_csv('xxx.csv')
+df = pd.read_csv('xxx.csv')
 
 print("----缺失值----")
 print(df.isna().any()) # 对各个列的数据，有缺失值对应True，否则对应False

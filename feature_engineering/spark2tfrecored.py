@@ -15,7 +15,6 @@ spark = SparkSession.builder \
 df = spark.read.options(delimiter=',') \
   .csv('/Users/yaheyang/sample.csv', header=False)
 
-# df.write.mode("overwrite").format("tfrecord").option("recordType", "Example").option("codec", "org.apache.hadoop.io.compress.DefaultCodec").save(outpath_) # spark 写tfrecord
 df.write.mode("overwrite").format("tfrecord").option("recordType", "Example").save("/Users/yaheyang/ss") # spark 写tfrecord
 
 # spark-submit --class xxx.xx.xx.mainObject  --master local[2]   /opt/xxx.jar
