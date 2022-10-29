@@ -30,12 +30,14 @@ config = BertConfig.from_pretrained(pretrained_model_name, output_hidden_states=
 tokenizer = BertTokenizer.from_pretrained(pretrained_model_name, config=config)
 model = TFBertModel.from_pretrained(pretrained_model_name, config=config)
 
-text1 = "北京"
+text1 = "北京" # 当文本速度过长时，时间会过长
 input1 = tokenizer(text1, return_tensors='tf')
+print(input1)
 output1 = model(input1)[-2]
 
-text2 = "长白山"
+text2 = "长白山北部"
 input2 = tokenizer(text2, return_tensors='tf')
+print(input2) # input_ids, token_type_ids, attention_mask
 output2 = model(input2)[-2]
 
 print("维度: ", output2.shape)

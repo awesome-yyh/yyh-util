@@ -6,12 +6,16 @@ from sklearn.model_selection import train_test_split # 自动随机切分训练�
 from sklearn import preprocessing
 
 
+# tf的基本信息
+print("------tf的基本信息-------")
 print("Tensorflow version: ", tf.__version__)
 print("Tensorflow is built with CUDA: ", tf.test.is_built_with_cuda())
 print("Tensorflow path: \n", tf.__path__)
 print("CPU or GPU: \n", device_lib.list_local_devices())
 print(tf.config.list_physical_devices('GPU'))
 
+# 四则运算
+print("------四则运算-------")
 A = tf.constant([[1, 2], [3, 4]])
 B = tf.constant([[5, 6], [7, 8]])
 C = tf.add(A, B)
@@ -21,14 +25,68 @@ print(D)
 # 查看矩阵A的形状、类型和值
 print(D.shape, D.dtype, D.numpy())
 
+# 统计运算
+print("------统计运算-------")
+
+# 求导
+print("------求导-------")
 x = tf.Variable(initial_value=3.)
 with tf.GradientTape() as tape:     # 在 tf.GradientTape() 的上下文内，所有计算步骤都会被记录以用于求导
     y = tf.square(x)
 y_grad = tape.gradient(y, x)        # 计算y关于x的导数
 print(y, y_grad)
 
+# layers.Flatten
+print("------layers.Flatten-------")
 
-# 线性回归
+# layers.Dense
+print("------layers.Dense-------")
+
+# layers.Dropout
+print("------layers.Dropout-------")
+
+# layers.Conv2D
+print("------layers.Conv2D-------")
+
+# layers.MaxPooling2D
+print("------layers.MaxPooling2D-------")
+
+# layers.SimpleRNN
+print("------layers.SimpleRNN-------")
+
+# layers.LSTM
+print("------layers.LSTM-------")
+
+# layers.GRU
+print("------layers.GRU-------")
+
+# layers.Bidirectional
+print("------layers.Bidirectional-------")
+# x = tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(16))(inputs)
+# x = tf.keras.layers.Bidirectional(tf.keras.layers.GRU(16))(inputs)
+
+
+# layers.Attention
+print("------layers.Attention-------")
+query = tf.convert_to_tensor(np.asarray([[[1., 1., 1., 3.]]]))
+
+key_list = tf.convert_to_tensor(np.asarray([[[1., 1., 2., 4.], [4., 1., 1., 3.], [1., 1., 2., 1.]]
+                                            ]))
+
+print('query shape:', query.shape)
+print('key shape:', key_list.shape)
+
+query_value_attention_seq = tf.keras.layers.Attention()([query, key_list])
+print('result 1:',query_value_attention_seq)
+
+scores = tf.matmul(query, key_list, transpose_b=True)
+distribution = tf.nn.softmax(scores)
+print('distribution: ', distribution)
+result = tf.matmul(distribution, key_list)
+print('result 2:',query_value_attention_seq)
+
+# 模型演示-线性回归
+print("------模型演示-线性回归-------")
 # 读取数据
 # y = 2*x - 1
 xs = np.array([-1.0,  0.0, 1.0, 2.0, 3.0, 4.0], dtype=float)
@@ -38,13 +96,13 @@ ys = np.array([-3.0, -1.0, 1.0, 3.0, 5.0, 7.0], dtype=float)
 # plt.plot(xs, ys, 'ro', label='Original data')
 # plt.show()
 
-# 数据清洗
+# 数据清洗(缺失值、重复值、异常值、大小写、标点)
 
-# 数据变换
+# 数据采样(搜集、合成、过采样、欠采样、阈值移动、loss加权、评价指标)
+
+# 特征工程(数值、文本、类别、时间)
 # xs = preprocessing.StandardScaler().fit_transform(xs.reshape(-1, 1))
 # ys = preprocessing.StandardScaler().fit_transform(ys.reshape(-1, 1))
-
-# 特征工程
 
 # 划分训练集和测试集, random_state是随机数的种子，不填则每次都不同
 train_x, test_x, train_y, test_y = train_test_split(xs, ys, test_size=0.2, random_state=1)
@@ -52,10 +110,9 @@ train_x, test_x, train_y, test_y = train_test_split(xs, ys, test_size=0.2, rando
 
 # 搭建模型
 x = tf.keras.Input(shape=(1,))
-y = tf.keras.layers.Attention(use_scale=True)([x, x])
-# y = tf.keras.layers.Dense(units=1, activation=None,
-#                         kernel_initializer=tf.zeros_initializer(),
-#                         bias_initializer=tf.zeros_initializer())(x)
+y = tf.keras.layers.Dense(units=1, activation=None,
+                        kernel_initializer=tf.zeros_initializer(),
+                        bias_initializer=tf.zeros_initializer())(x)
 model = tf.keras.Model(inputs=x, outputs=y)
 
 # 查看模型结构

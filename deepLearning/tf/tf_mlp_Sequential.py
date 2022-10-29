@@ -38,16 +38,13 @@ mnist = tf.keras.datasets.mnist
 # 数据探索分析
 
 
-# 数据清洗
+# 数据清洗(缺失值、重复值、异常值、大小写、标点)
 
+# 数据采样(搜集、合成、过采样、欠采样、阈值移动、loss加权、评价指标)
 
-# 数据变换
+# 特征工程(数值、文本、类别、时间)
 training_images = training_images/255.0
 test_images = test_images/255.0
-
-
-# 特征工程
-
 
 # 划分训练集、验证集、测试集
 training_images, val_images, training_labels, val_labels = train_test_split(
