@@ -1,6 +1,15 @@
+import pandas as pd
 import tensorflow as tf
 
 
+# get_dummies: pandas的one-hot encoding
+# 当特征为字符串形式的类别型特征时，比如“Embarked”代表登船口岸
+embarked_oht = pd.get_dummies(df_train[['Embarked']])
+# 当特征为字符串形式的数值型特征时，比如“Pclass”代表船舱等级，其取值为[1,2,3],用数字代表不同等级的船舱，本质上还是类别型特征
+Pclass_oht = pd.get_dummies(df_train['Pclass'].apply(lambda x:str(x)))
+
+
+# 或tfrecore解析时做特征工程
 feature_columns = []
 
 # 类别列
