@@ -125,7 +125,8 @@ if os.path.exists(ckpt_file_path):
 
 # 模型的保存(pb)
 pb_file_path = './models/multiModel/cnn/1'
-tf.keras.models.save_model(model, pb_file_path)
+model.save(pb_file_path, save_format='tf')
+# 或 tf.keras.models.save_model(model, pb_file_path)
 
 # 模型加载和预测(pb)
 restored_saved_model=tf.keras.models.load_model(pb_file_path)

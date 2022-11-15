@@ -17,7 +17,7 @@ t1 = time.time()
 query_embedding = model.encode('北京')
 t2 = time.time()
 print(t2-t1)
-docs_embedding = model.encode(['长白山','故宫', '北京故宫', '北京'])
+docs_embedding = model.encode(['peking','beijing','bert','故宫', '北京故宫', '北京'])
 print(time.time()-t2)
 
 print(query_embedding.shape)

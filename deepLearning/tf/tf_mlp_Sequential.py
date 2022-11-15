@@ -120,11 +120,11 @@ cp_callback = tf.keras.callbacks.ModelCheckpoint(
     options=None, initial_value_threshold=None
 )
 
-# 断点续训
-if os.path.exists(ckpt_file_path):
-    model.load_weights(ckpt_file_path)
-    # 若成功加载前面保存的参数，输出下列信息
-    print("checkpoint_loaded")
+# # 断点续训
+# if os.path.exists(ckpt_file_path):
+#     model.load_weights(ckpt_file_path)
+#     # 若成功加载前面保存的参数，输出下列信息
+#     print("checkpoint_loaded")
 
 history = model.fit(training_images, training_labels, 
                     validation_data = (val_images, val_labels),
@@ -172,7 +172,8 @@ if os.path.exists(ckpt_file_path):
 
 # 模型的保存(pb)
 pb_file_path = './models/multiModel/mlp/1'
-tf.keras.models.save_model(model, pb_file_path)
+model.save(pb_file_path, save_format='tf')
+# 或 tf.keras.models.save_model(model, pb_file_path)
 
 # 模型加载和预测(pb)
 restored_saved_model=tf.keras.models.load_model(pb_file_path)

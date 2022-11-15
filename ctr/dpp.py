@@ -5,6 +5,7 @@ LastEditors: yangyahe
 Date: 2022-08-23 16:52:53
 LastEditTime: 2022-08-23 18:04:56
 Description: dpp多样性核心代码, 包括核矩阵的构造和滑动窗口式dpp计算, 使用numpy进行矩阵运算
+向量d维, 物品k个, 需要d>=k
 '''
 import numpy as np
 import time
