@@ -88,8 +88,8 @@ print('####################################')
 restore_saver = tf.train.Saver()
 restore_saver.restore(sess, init_checkpoint)
 
-print(response_request('我叫水奈樾。'))
-1/0
+print(response_request('北京故宫'))
+
 # 获取对应的embedding 输入数据[batch_size, seq_length, embedding_size]
 embedding = ftModel.get_sequence_output()
 

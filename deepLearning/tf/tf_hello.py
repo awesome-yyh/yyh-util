@@ -4,15 +4,19 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split # 自动随机切分训练数据和测试数据
 from sklearn import preprocessing
+import tensorflow_hub as hub
 
 
 # tf的基本信息
 print("------tf的基本信息-------")
 print("Tensorflow version: ", tf.__version__)
+print("Eager mode: ", tf.executing_eagerly())
 print("Tensorflow is built with CUDA: ", tf.test.is_built_with_cuda())
 print("Tensorflow path: \n", tf.__path__)
 print("CPU or GPU: \n", device_lib.list_local_devices())
-print(tf.config.list_physical_devices('GPU'))
+print("GPU is", "available" if tf.config.experimental.list_physical_devices("GPU") else "NOT AVAILABLE")
+print("Hub version: ", hub.__version__)
+
 
 # 四则运算
 print("------四则运算-------")

@@ -8,6 +8,8 @@ from sklearn.model_selection import train_test_split
 # from pyspark.sql import SparkSession
 
 
+# 使用2个Dense层对mnist手写数字识别(sequential模式)
+
 # 方式一：使用spark对数据读取、清洗、特征工程、划分，最后存储为TFRecord
 # from pyspark.sql import SparkSession
 # spark = SparkSession.builder.master("yarn")
@@ -50,7 +52,7 @@ with tf.io.TFRecordWriter(tfrecords_path) as file_writer:
         })).SerializeToString()
         file_writer.write(record_bytes)
 
-# 将tfrecords数据解析出来
+# 将TFRecord数据解析出来
 def decode_tfrecords(example):
     # 定义Feature结构，告诉解码器每个Feature的类型是什么
     feature_description = {                        

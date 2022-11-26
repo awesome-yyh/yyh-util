@@ -7,6 +7,8 @@ from sklearn import preprocessing
 import tensorflow as tf
 
 
+# 使用transformer对imdb电影评价数据集做文本二分类
+
 # 读取数据
 # !curl -O https://ai.stanford.edu/~amaas/data/sentiment/aclImdb_v1.tar.gz
 # !tar -xf aclImdb_v1.tar.gz

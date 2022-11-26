@@ -7,6 +7,8 @@ from sklearn import preprocessing
 import tensorflow as tf
 
 
+# 使用rnn对jena_climate_2009_2016天气数据做预测
+
 # 读取数据
 # !wget https://s3.amazonaws.com/keras-datasets/jena_climate_2009_2016.csv.zip
 # !unzip jena_climate_2009_2016.csv.zip

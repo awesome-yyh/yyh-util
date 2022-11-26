@@ -1,6 +1,9 @@
 import tensorflow as tf
 import os
 
+
+# 对训练好的bert模型进行剪枝，并重新保存
+
 sess = tf.Session()
 last_name = 'bert_model.ckpt'
 model_path = 'chinese_L-12_H-768_A-12'

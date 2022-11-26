@@ -6,6 +6,8 @@ from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
 
 
+# 使用cnn对mnist手写数字识别(function模式)
+
 # 读取数据
 mnist = tf.keras.datasets.mnist
 (training_images, training_labels), (test_images, test_labels) = mnist.load_data()

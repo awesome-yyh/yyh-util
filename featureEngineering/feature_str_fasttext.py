@@ -39,12 +39,12 @@ corpus = [dictionary.doc2bow(text) for text in texts]
 print(corpus)
 
 # Save the Dictionary and BOW
-dictionary.save('./g_dict1.dict') 
-corpora.MmCorpus.serialize('./g_bow1.mm', corpus)  
+dictionary.save('./models/g_dict1.dict') 
+corpora.MmCorpus.serialize('./models/g_bow1.mm', corpus)  
 
 # Load the Dictionary and BOW
-dictionary = corpora.Dictionary.load('./g_dict1.dict')
-corpus = corpora.MmCorpus('./g_bow1.mm')
+dictionary = corpora.Dictionary.load('./models/g_dict1.dict')
+corpus = corpora.MmCorpus('./models/g_bow1.mm')
 
 print(dictionary.token2id)
 print(corpus)
@@ -53,8 +53,8 @@ print(corpus)
 print("TF-IDF:")
 tfidfModel = models.TfidfModel(corpus)
 
-tfidfModel.save("./model.tfidf") # 模型保存和加载
-tfidfModel = models.TfidfModel.load("./model.tfidf")
+tfidfModel.save("./models/model.tfidf") # 模型保存和加载
+tfidfModel = models.TfidfModel.load("./models/model.tfidf")
 
 corpus_tfidf = [tfidfModel[doc] for doc in corpus]
 print(corpus_tfidf)
@@ -65,8 +65,8 @@ from gensim.models.word2vec import Word2Vec
 
 w2vModel = Word2Vec(texts, min_count=1) # 先遍历一次语料库建立词典，再遍历语料库训练神经网络模型
 
-w2vModel.save('./model.word2vec') # 模型保存和加载
-w2vModel = Word2Vec.load('./model.word2vec')
+w2vModel.save('./models/model.word2vec') # 模型保存和加载
+w2vModel = Word2Vec.load('./models/model.word2vec')
 
 print(w2vModel.wv['今天']) # 只能处理训练过的词
 print(w2vModel.wv['今天'].shape)
@@ -86,8 +86,8 @@ ftModel = FastText(texts, vector_size=100, window=5, min_count=1, workers=4,sg=1
 # Hs：=1表示层次softmax，=0表示负采样
 
 # 存储和载入模型
-ftModel.save('./model.fasttext') # 保存的文件不能利用文本编辑器查看但是保存了训练的全部信息，可以在读取后追加训练
-ftModel = FastText.load('./model.fasttext') # 加载模型
+ftModel.save('./models/model.fasttext') # 保存的文件不能利用文本编辑器查看但是保存了训练的全部信息，可以在读取后追加训练
+ftModel = FastText.load('./models/model.fasttext') # 加载模型
 
 # 查看向量
 print(ftModel.wv['今天的'])
@@ -104,5 +104,5 @@ print(fftModel.get_sentence_vector("北京 故宫")) # 获取句子向量，单�
 print(fftModel.get_dimension()) # 向量维度
 
 # 模型的保存和加载
-fftModel.save_model("./model.fasttext.bin")
-fftModel = fasttext.load_model("./model.fasttext.bin")
+fftModel.save_model("./models/model.fasttext.bin")
+fftModel = fasttext.load_model("./models/model.fasttext.bin")

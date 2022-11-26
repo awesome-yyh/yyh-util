@@ -5,6 +5,9 @@ import json
 import requests
 
 
+# docker run tf-serving后
+# 使用requests post要预测的数据，请求服务，返回预测的结果
+
 # docker run -t --rm -p 8500:8500 -p 8501:8501 --mount type=bind,
 # source=/Users/yaheyang/mypython/yyh-util/models/multiModel,
 # target=/models/multiModel --platform linux/amd64 
