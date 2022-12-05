@@ -4,6 +4,10 @@ import torch
 # pytorch的基本信息
 print("------pytorch的基本信息-------")
 print("pytorch version: ", torch.__version__)
+# mac gpu 测试:
+print(torch.backends.mps.is_available()) 
+print(torch.backends.mps.is_built())
+
 # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 device=torch.device("mps") # mac m1 gpu: mps
 print("CPU or GPU: ", device)

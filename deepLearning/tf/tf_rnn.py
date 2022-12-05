@@ -36,7 +36,7 @@ print(temperature[0], raw_data[0])
 
 # 数据清洗(缺失值、重复值、异常值、大小写、标点)
 
-# 数据采样(搜集、合成、过采样、欠采样、阈值移动、loss加权、评价指标)
+# 类别不均衡(搜集、合成、过采样、欠采样、阈值移动、loss加权、更改评价指标)
 
 # 特征工程(数值、文本、类别、时间)
 # raw_data = preprocessing.StandardScaler().fit_transform(raw_data)
