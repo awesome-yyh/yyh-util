@@ -4,6 +4,7 @@ import numpy as np
 import tensorflow as tf
 from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
+from tf_resnet import *
 
 
 # 使用cnn对mnist手写数字识别(function模式)
@@ -31,18 +32,37 @@ training_images, val_images, training_labels, val_labels = train_test_split(
 
 
 # 搭建模型
-inputs = tf.keras.Input(shape=(28, 28, 1))
-x = tf.keras.layers.Conv2D(filters=32, kernel_size=3, activation="relu")(inputs)
-x = tf.keras.layers.MaxPooling2D(pool_size=2)(x)
-x = tf.keras.layers.Conv2D(filters=64, kernel_size=3, activation="relu")(x)
-x = tf.keras.layers.MaxPooling2D(pool_size=2)(x)
-x = tf.keras.layers.Conv2D(filters=128, kernel_size=3, activation="relu")(x)
-x = tf.keras.layers.Flatten()(x)
-outputs = tf.keras.layers.Dense(10, activation="softmax")(x)
-model = tf.keras.Model(inputs=inputs, outputs=outputs)
+class LeNet_5(tf.keras.Model):
+    def __init__(self, num_classes=10):
+        super().__init__()
+        self.num_classes = num_classes
+        self.c1 = tf.keras.layers.Conv2D(filters=6, kernel_size=(5,5), padding='valid', activation="tanh")
+        self.s2 = tf.keras.layers.MaxPooling2D(pool_size=(2,2))
+        self.c3 = tf.keras.layers.Conv2D(filters=16, kernel_size=(5,5), padding='valid', activation="tanh")
+        self.s4 = tf.keras.layers.MaxPooling2D(pool_size=(2,2))
+        self.flatten = tf.keras.layers.Flatten()
+        self.f5 = tf.keras.layers.Dense(120, activation="tanh")
+        self.f6 = tf.keras.layers.Dense(84, activation="tanh")
+        self.f7 = tf.keras.layers.Dense(num_classes, activation="softmax")
+
+    def call(self, inputs):
+        x = self.c1(inputs)
+        x = self.s2(x)
+        x = self.c3(x)
+        x = self.s4(x)
+        x = self.flatten(x)
+        x = self.f5(x)
+        x = self.f6(x)
+        x = self.f7(x)
+        
+        return x
+
+
+model = LeNet_5(num_classes=10)
+# model = resnet18(num_classes=10)
 
 # 查看模型结构
-# model.build((None,))
+model.build(input_shape=(None, 28, 28, 1))
 model.summary()
 tf.keras.utils.plot_model(model, "model.png", show_shapes=True)
 
@@ -76,11 +96,11 @@ ckpt_callback = tf.keras.callbacks.ModelCheckpoint(
     options=None, initial_value_threshold=None
 )
 
-# 断点续训
-if os.path.exists(ckpt_file_path):
-    model.load_weights(ckpt_file_path)
-    # 若成功加载前面保存的参数，输出下列信息
-    print("checkpoint_loaded")
+# # 断点续训
+# if os.path.exists(ckpt_file_path):
+#     model.load_weights(ckpt_file_path)
+#     # 若成功加载前面保存的参数，输出下列信息
+#     print("checkpoint_loaded")
 
 history = model.fit(training_images, training_labels, 
                     validation_data = (val_images, val_labels),
