@@ -2,15 +2,15 @@ import datetime
 import os
 import numpy as np
 import tensorflow as tf
+from tensorflow.keras.datasets import mnist
 from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
 from tf_resnet import *
 
 
-# 使用cnn对mnist手写数字识别(function模式)
+# 使用cnn对mnist手写数字识别
 
 # 读取数据
-mnist = tf.keras.datasets.mnist
 (training_images, training_labels), (test_images, test_labels) = mnist.load_data()
 
 # 数据探索分析
