@@ -1,14 +1,16 @@
-import datetime
-import os
+import os, datetime
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras.datasets import mnist
 from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
-from tf_resnet import *
+from tf_ResNet import *
+from tf_LeNet import LeNet_5
 
 
-# 使用cnn对mnist手写数字识别
+"""
+使用cnn做mnist手写数字识别
+"""
 
 # 读取数据
 (training_images, training_labels), (test_images, test_labels) = mnist.load_data()
@@ -19,7 +21,7 @@ from tf_resnet import *
 
 # 类别不均衡(搜集、合成、过采样、欠采样、阈值移动、loss加权、更改评价指标)
 
-# 特征工程(数值、文本、类别、时间)
+# 特征工程(数值、类别、时间、文本、图像)
 training_images=training_images.reshape(60000, 28, 28, 1)
 test_images = test_images.reshape(10000, 28, 28, 1)
 
@@ -32,39 +34,13 @@ training_images, val_images, training_labels, val_labels = train_test_split(
 
 
 # 搭建模型
-class LeNet_5(tf.keras.Model):
-    def __init__(self, num_classes=10):
-        super().__init__()
-        self.num_classes = num_classes
-        self.c1 = tf.keras.layers.Conv2D(filters=6, kernel_size=(5,5), padding='valid', activation="tanh")
-        self.s2 = tf.keras.layers.MaxPooling2D(pool_size=(2,2))
-        self.c3 = tf.keras.layers.Conv2D(filters=16, kernel_size=(5,5), padding='valid', activation="tanh")
-        self.s4 = tf.keras.layers.MaxPooling2D(pool_size=(2,2))
-        self.flatten = tf.keras.layers.Flatten()
-        self.f5 = tf.keras.layers.Dense(120, activation="tanh")
-        self.f6 = tf.keras.layers.Dense(84, activation="tanh")
-        self.f7 = tf.keras.layers.Dense(num_classes, activation="softmax")
-
-    def call(self, inputs):
-        x = self.c1(inputs)
-        x = self.s2(x)
-        x = self.c3(x)
-        x = self.s4(x)
-        x = self.flatten(x)
-        x = self.f5(x)
-        x = self.f6(x)
-        x = self.f7(x)
-        
-        return x
-
-
 model = LeNet_5(num_classes=10)
 # model = resnet18(num_classes=10)
 
 # 查看模型结构
 model.build(input_shape=(None, 28, 28, 1))
 model.summary()
-tf.keras.utils.plot_model(model, "model.png", show_shapes=True)
+# tf.keras.utils.plot_model(model, "deepLearning/tf/CV/model.png", show_shapes=True)
 
 model.compile(optimizer = tf.keras.optimizers.Adam(learning_rate=1e-3), 
               loss = tf.keras.losses.sparse_categorical_crossentropy, 
@@ -107,60 +83,62 @@ history = model.fit(training_images, training_labels,
                     callbacks=[early_stopping, tensorboard_callback, ckpt_callback],
                     batch_size = 128, epochs=3, verbose=2)
 
-# 模型评估和改进
-# > tensorboard --logdir logs/mlp
-import matplotlib.pyplot as plt
-history_dict = history.history
-loss_values = history_dict["loss"]
-val_loss_values = history_dict["val_loss"]
-epochs = range(1, len(loss_values) + 1)
-plt.subplot(121)
-plt.plot(epochs, loss_values, "bo", label="Training loss")
-plt.plot(epochs, val_loss_values, "b", label="Validation loss")
-plt.title("Training and validation loss")
-plt.xlabel("Epochs")
-plt.ylabel("Loss")
-plt.legend()
+# # 模型评估和改进
+# # > tensorboard --logdir logs/mlp
+# import matplotlib.pyplot as plt
+# history_dict = history.history
+# loss_values = history_dict["loss"]
+# val_loss_values = history_dict["val_loss"]
+# epochs = range(1, len(loss_values) + 1)
+# plt.subplot(121)
+# plt.plot(epochs, loss_values, "bo", label="Training loss")
+# plt.plot(epochs, val_loss_values, "b", label="Validation loss")
+# plt.title("Training and validation loss")
+# plt.xlabel("Epochs")
+# plt.ylabel("Loss")
+# plt.legend()
 
-plt.subplot(122)
-acc = history_dict["accuracy"]
-val_acc = history_dict["val_accuracy"]
-plt.plot(epochs, acc, "bo", label="Training acc")
-plt.plot(epochs, val_acc, "b", label="Validation acc")
-plt.title("Training and validation accuracy")
-plt.xlabel("Epochs")
-plt.ylabel("Accuracy")
-plt.legend()
-plt.show()
+# plt.subplot(122)
+# acc = history_dict["accuracy"]
+# val_acc = history_dict["val_accuracy"]
+# plt.plot(epochs, acc, "bo", label="Training acc")
+# plt.plot(epochs, val_acc, "b", label="Validation acc")
+# plt.title("Training and validation accuracy")
+# plt.xlabel("Epochs")
+# plt.ylabel("Accuracy")
+# plt.legend()
+# plt.show()
 
 test_loss, test_acc = model.evaluate(test_images, test_labels, verbose=2)
+print("=============")
 print("在测试集的准确率: ", test_acc)
+print("=============")
 
 # 模型保存加载和部署
 # 模型加载和预测(ckpt)
 if os.path.exists(ckpt_file_path):
     model.load_weights(ckpt_file_path)
-    classifications = model.predict(test_images)
-    print(f"第一张图片的预测值: {np.argmax(classifications[0])}, 概率: {np.max(classifications[0])}")
+    test_input = np.expand_dims(test_images[0],0)
+    pred = model.predict(test_input)
+    print(f"第一张图片的预测值: {np.argmax(pred)}, 概率: {np.max(pred)}")
     print(f"第一张图片的真实值: {test_labels[0]}")
 
 # 模型的保存(pb)
 pb_file_path = './models/multiModel/cnn/1'
 model.save(pb_file_path, save_format='tf')
-# 或 tf.keras.models.save_model(model, pb_file_path)
 
 # 模型加载和预测(pb)
 restored_saved_model=tf.keras.models.load_model(pb_file_path)
 test_input = np.expand_dims(test_images[0],0)
-pred = restored_saved_model.predict(test_input) # 模型预测
-print(f"第一张图片的预测值: {np.argmax(pred)}")
+pred = restored_saved_model.predict(test_input)
+print(f"第一张图片的预测值: {np.argmax(pred)}, 概率: {np.max(pred)}")
 print(f"第一张图片的真实值: {test_labels[0]}")
+
+# import matplotlib.pyplot as plt
+# digit = test_images[0]
+# plt.imshow(digit, cmap=plt.cm.binary)
+# plt.show()
 
 # restored_saved_model.get_layer("dense_1").kernel # 查看模型参数
 
 # 最后使用docker-tf-serving部署pb文件的模型，即可使用http在线访问预测
-
-import matplotlib.pyplot as plt
-digit = test_images[0]
-plt.imshow(digit, cmap=plt.cm.binary)
-plt.show()

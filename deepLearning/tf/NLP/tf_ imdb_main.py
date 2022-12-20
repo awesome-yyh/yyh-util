@@ -1,0 +1,157 @@
+import os, datetime
+import numpy as np
+import tensorflow as tf
+from tensorflow.keras.datasets import imdb
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+from matplotlib import pyplot as plt
+from sklearn.model_selection import train_test_split
+from tf_textcnn import TextCNN
+from tf_fasttext import FastText
+from tf_textrnn import TextRNN
+from tf_textSelfAtt import TextSelfAtt
+from tf_transformer import TextTransformerEncoder
+
+
+"""
+imdb电影评价二分类
+"""
+
+# 读取数据
+(training_texts, training_labels), (test_texts, test_labels) = imdb.load_data(num_words=5000) # 大于该词频的单词会被读取
+
+# 数据探索分析
+
+# 数据清洗(缺失值、重复值、异常值、大小写、标点)
+
+# 类别不均衡(搜集、合成、过采样、欠采样、阈值移动、loss加权、更改评价指标)
+
+# 特征工程(数值、类别、时间、文本、图像)
+training_texts = pad_sequences(training_texts, maxlen=400, padding='post')
+test_texts = pad_sequences(test_texts, maxlen=400, padding='post')
+# maxlen为序列的最大长度。大于此长度的序列将被截短，小于此长度的序列将在后部填0
+# padding：'pre'或'post'，确定当需要补0时，在序列的起始还是结尾补
+
+# 划分训练集、验证集、测试集
+training_texts, val_texts, training_labels, val_labels = train_test_split(
+    training_texts, training_labels, test_size=0.2, random_state=1, stratify=training_labels)
+
+# 搭建模型
+# model = TextCNN(maxlen=400,
+#                 max_features=5000,
+#                 embedding_dims=200,
+#                 class_num=2,
+#                 kernel_sizes=[2,3,5],
+#                 kernel_regularizer=None,
+#                 last_activation='softmax')
+
+# model = FastText(maxlen=400,
+#                 max_features=5000,
+#                 embedding_dims=100,
+#                 class_num=2,
+#                 last_activation='softmax')
+
+# model = TextRNN(maxlen=400,
+#                 max_features=5000,
+#                 embedding_dims=100,
+#                 class_num=2,
+#                 last_activation='softmax',
+#                 # dense_size=[128, 64],
+#                 dense_size = None)
+
+# model = TextSelfAtt(maxlen=400,
+#                     max_features=5000,
+#                     embedding_dims=400,
+#                     class_num=2,
+#                     last_activation='softmax',
+#                     dense_size=[128, 64],
+#                     # dense_size = None
+#                     )
+
+model = TextTransformerEncoder(
+                    maxlen=400,
+                    max_features=5000,
+                    embedding_dims=400,
+                    class_num=2,
+                    num_layers=2,
+                    num_heads=8,
+                    dff=2048,
+                    pe_input=10000
+                    )
+    
+# 查看模型结构
+model.build(input_shape=(None, 400))
+model.summary()
+# tf.keras.utils.plot_model(model, "deepLearning/tf/CV/model.png", show_shapes=True)
+
+model.compile(optimizer = tf.keras.optimizers.Adam(learning_rate=1e-3), 
+              loss = tf.keras.losses.sparse_categorical_crossentropy, 
+              metrics=['accuracy'])
+
+# 训练模型
+# early_stopping
+early_stopping = tf.keras.callbacks.EarlyStopping(
+    monitor='val_accuracy', 
+    verbose=1,
+    patience=10, # 每10步检查一下是否提升
+    mode='max', # monitor是准确率时max，是损失时min
+    restore_best_weights=True)
+
+# tensorboard
+log_dir="./logs/textcnn/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+tensorboard_callback = tf.keras.callbacks.TensorBoard(
+    log_dir=log_dir, histogram_freq=1, write_graph=True,
+    write_images=True, write_steps_per_second=False, update_freq='epoch',
+    profile_batch=0, embeddings_freq=0, embeddings_metadata=None)
+
+# 保存ckpt文件
+ckpt_file_path = "./models/textcnnckpt/"
+ckpt_callback = tf.keras.callbacks.ModelCheckpoint(
+    ckpt_file_path, verbose=0, 
+    monitor='val_loss', mode='min',
+    save_freq='epoch', save_best_only=False,
+    save_weights_only=True, 
+    options=None, initial_value_threshold=None
+)
+
+# # 断点续训
+# if os.path.exists(ckpt_file_path):
+#     model.load_weights(ckpt_file_path)
+#     # 若成功加载前面保存的参数，输出下列信息
+#     print("checkpoint_loaded")
+
+history = model.fit(training_texts, training_labels, 
+                    validation_data = (val_texts, val_labels),
+                    callbacks=[early_stopping, tensorboard_callback, ckpt_callback],
+                    batch_size = 128, epochs=3, verbose=2)
+
+# 模型评估和改进
+# > tensorboard --logdir logs/mlp
+
+test_loss, test_acc = model.evaluate(test_texts, test_labels, verbose=2)
+print("=============")
+print("在测试集的准确率: ", test_acc)
+print("=============")
+
+# 模型保存加载和部署
+# 模型加载和预测(ckpt)
+if os.path.exists(ckpt_file_path):
+    model.load_weights(ckpt_file_path)
+    test_input = np.expand_dims(test_texts[0],0)
+    pred = model.predict(test_input)
+    print(f"第一句文本的预测值: {np.argmax(pred)}, 概率: {np.max(pred)}")
+    print(f"第一句文本的真实值: {test_labels[0]}")
+
+# 模型的保存(pb)
+pb_file_path = './models/multiModel/textcnn/1'
+model.save(pb_file_path, save_format='tf')
+
+# 模型加载和预测(pb)
+restored_saved_model=tf.keras.models.load_model(pb_file_path)
+test_input = np.expand_dims(test_texts[0],0)
+pred = restored_saved_model.predict(test_input)
+print(f"第一句文本的预测值: {np.argmax(pred)}, 概率: {np.max(pred)}")
+print(f"第一句文本的真实值: {test_labels[0]}")
+
+# restored_saved_model.get_layer("dense_1").kernel # 查看模型参数
+
+# 最后使用docker-tf-serving部署pb文件的模型，即可使用http在线访问预测
