@@ -1,15 +1,18 @@
 import os, datetime
 import numpy as np
+import pandas as pd
 import tensorflow as tf
-from tensorflow.keras.datasets import imdb
 from tensorflow.keras.preprocessing.sequence import pad_sequences
+from tensorflow.keras.preprocessing.text import Tokenizer
 from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
-from tf_textcnn import TextCNN
+from prepare_data import convert_raw_data_into_csv
 from tf_fasttext import FastText
+from tf_textcnn import TextCNN
 from tf_textrnn import TextRNN
 from tf_textSelfAtt import TextSelfAtt
 from tf_transformer import TextTransformerEncoder
+from tf_bert import convert_examples_to_features, TFBertForTokenClassification
 
 
 """
@@ -17,49 +20,66 @@ imdb电影评价二分类
 """
 
 # 读取数据
-(training_texts, training_labels), (test_texts, test_labels) = imdb.load_data(num_words=5000) # 大于该词频的单词会被读取
+data_df = convert_raw_data_into_csv()
+print(data_df.shape)
+print(data_df.head(10))
 
 # 数据探索分析
 
 # 数据清洗(缺失值、重复值、异常值、大小写、标点)
 
 # 类别不均衡(搜集、合成、过采样、欠采样、阈值移动、loss加权、更改评价指标)
+print(data_df['label'].value_counts(normalize=True))
 
 # 特征工程(数值、类别、时间、文本、图像)
-training_texts = pad_sequences(training_texts, maxlen=400, padding='post')
-test_texts = pad_sequences(test_texts, maxlen=400, padding='post')
+max_words = 10000
+seq_len = 100
+tokenizer = Tokenizer(num_words=max_words, filters='!"#$%&()*+,-./:;<=>?@[\]^_`{|}~', lower=True)
+tokenizer.fit_on_texts(data_df['review'].values)
+
+X = tokenizer.texts_to_sequences(data_df['review'].values)
+X = pad_sequences(X, maxlen=seq_len, padding='post')
 # maxlen为序列的最大长度。大于此长度的序列将被截短，小于此长度的序列将在后部填0
 # padding：'pre'或'post'，确定当需要补0时，在序列的起始还是结尾补
+y = pd.get_dummies(data_df['label']).values
+
+# bert
+# tokenizer = BertTokenizer.from_pretrained("klue/bert-base")
+# X, y = convert_examples_to_features(
+#     train_data_sentence, train_data_label, max_seq_len=128, tokenizer=tokenizer
+# )
 
 # 划分训练集、验证集、测试集
+training_texts, test_texts, training_labels, test_labels = train_test_split(X,y, test_size = 0.20, random_state = 42)
 training_texts, val_texts, training_labels, val_labels = train_test_split(
     training_texts, training_labels, test_size=0.2, random_state=1, stratify=training_labels)
 
+
 # 搭建模型
-# model = TextCNN(maxlen=400,
-#                 max_features=5000,
+model = FastText(maxlen=seq_len,
+                max_features=max_words,
+                embedding_dims=100,
+                class_num=2,
+                last_activation='softmax')
+
+# model = TextCNN(maxlen=seq_len,
+#                 max_features=max_words,
 #                 embedding_dims=200,
 #                 class_num=2,
 #                 kernel_sizes=[2,3,5],
 #                 kernel_regularizer=None,
 #                 last_activation='softmax')
 
-# model = FastText(maxlen=400,
-#                 max_features=5000,
-#                 embedding_dims=100,
-#                 class_num=2,
-#                 last_activation='softmax')
-
-# model = TextRNN(maxlen=400,
-#                 max_features=5000,
+# model = TextRNN(maxlen=seq_len,
+#                 max_features=max_words,
 #                 embedding_dims=100,
 #                 class_num=2,
 #                 last_activation='softmax',
 #                 # dense_size=[128, 64],
 #                 dense_size = None)
 
-# model = TextSelfAtt(maxlen=400,
-#                     max_features=5000,
+# model = TextSelfAtt(maxlen=seq_len,
+#                     max_features=max_words,
 #                     embedding_dims=400,
 #                     class_num=2,
 #                     last_activation='softmax',
@@ -67,24 +87,30 @@ training_texts, val_texts, training_labels, val_labels = train_test_split(
 #                     # dense_size = None
 #                     )
 
-model = TextTransformerEncoder(
-                    maxlen=400,
-                    max_features=5000,
-                    embedding_dims=400,
-                    class_num=2,
-                    num_layers=2,
-                    num_heads=8,
-                    dff=2048,
-                    pe_input=10000
-                    )
-    
+# model = TextTransformerEncoder(maxlen=seq_len,
+#                     max_features=max_words,
+#                     embedding_dims=400,
+#                     num_heads=2,
+#                     class_num=2,
+#                     last_activation='softmax',
+#                     dense_size=[128, 64],
+#                     # dense_size = None
+#                     )
+
+# pretrained_model_name = "hfl/chinese-roberta-wwm-ext"
+# model = TFBertForTokenClassification(model_name=pretrained_model_name,
+#                 class_num=2,
+#                 last_activation='softmax',
+# )
+
 # 查看模型结构
-model.build(input_shape=(None, 400))
+model.build(input_shape=(None, seq_len))
 model.summary()
-# tf.keras.utils.plot_model(model, "deepLearning/tf/CV/model.png", show_shapes=True)
+tf.keras.utils.plot_model(model.build_graph(seq_len), "deepLearning/tf/NLP/fasttext.png",
+                        show_shapes=True)
 
 model.compile(optimizer = tf.keras.optimizers.Adam(learning_rate=1e-3), 
-              loss = tf.keras.losses.sparse_categorical_crossentropy, 
+              loss = "categorical_crossentropy",
               metrics=['accuracy'])
 
 # 训练模型

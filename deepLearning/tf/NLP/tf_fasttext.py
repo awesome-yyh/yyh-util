@@ -1,21 +1,28 @@
 import  tensorflow as tf
-from tensorflow.keras.layers import Embedding, Conv1D, GlobalAveragePooling1D, Dense, Concatenate, GlobalMaxPooling1D
-from tensorflow.keras import Model
+from tensorflow.keras.layers import Embedding, GlobalAveragePooling1D, Dense
 
-class FastText(Model):
 
+class FastText(tf.keras.Model):
     def __init__(self,
-                    maxlen,
-                    max_features,
-                    embedding_dims,
-                    class_num,
-                    last_activation = 'softmax'
+                maxlen,
+                max_features,
+                embedding_dims,
+                class_num,
+                last_activation = 'softmax'
                 ):
-        super(FastText, self).__init__()
+        '''
+        :param maxlen: 文本序列最大长度
+        :param max_features: 词汇表大小
+        :param embedding_dims: embedding维度大小
+        :param class_num: 分类数
+        :param last_activation: # 最后一层的激活函数
+        '''
+        super().__init__()
         self.maxlen = maxlen
-        # self.max_features = max_features
-        # self.embedding_dims = embedding_dims
+        self.max_features = max_features
+        self.embedding_dims = embedding_dims
         self.class_num = class_num
+        
         self.embedding = Embedding(input_dim=max_features, output_dim=embedding_dims, input_length=maxlen)
         self.pooling = GlobalAveragePooling1D()
         self.dense = Dense(128, activation='relu')
@@ -41,6 +48,11 @@ class FastText(Model):
             raise AttributeError("User should define 'call' method in sub-class model!")
         _ = self.call(inputs)
 
+    def build_graph(self, input_shape):
+        input_ = tf.keras.layers.Input(shape=input_shape)
+        return tf.keras.models.Model(inputs=[input_], outputs=self.call(input_))
+
+
 if __name__=='__main__':
     model = FastText(maxlen=400,
                     max_features=5000,
@@ -48,5 +60,7 @@ if __name__=='__main__':
                     class_num=2,
                     last_activation='softmax',
     )
-    model.build_graph(input_shape=(None, 400))
+    model.build(input_shape=(None, 400))
     model.summary()
+    tf.keras.utils.plot_model(model.build_graph(400), "deepLearning/tf/NLP/fasttext.png",
+                              show_shapes=True)

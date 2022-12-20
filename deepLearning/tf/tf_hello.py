@@ -83,6 +83,8 @@ query_value_attention_seq = tf.keras.layers.Attention()([query, key_list])
 print('result 1:',query_value_attention_seq)
 
 scores = tf.matmul(query, key_list, transpose_b=True)
+dk = tf.cast(tf.shape(key_list)[-1], dtype=tf.float64)
+scaled_attention_logits = scores/tf.math.sqrt(dk)
 distribution = tf.nn.softmax(scores)
 print('distribution: ', distribution)
 result = tf.matmul(distribution, key_list)
@@ -128,7 +130,7 @@ model.compile(loss='mse', optimizer='sgd', metrics=['mae'])
 # 训练模型
 early_stop=tf.keras.callbacks.EarlyStopping(monitor='loss',
                                             patience=20) # 每20步检查一下是否提升
-history = model.fit(train_x, train_y, epochs=200, callbacks=[early_stop], verbose=2)
+history = model.fit(train_x, train_y, epochs=200, callbacks=[early_stop], verbose=0)
 
 # 模型评估和改进
 test_loss, test_acc = model.evaluate(test_x, test_y, verbose=2)

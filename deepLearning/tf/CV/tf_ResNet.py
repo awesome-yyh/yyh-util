@@ -197,6 +197,11 @@ class ResNet(keras.Model):
         x = self.avgpool(x)
         x = self.fc(x)
         return x
+    
+    def build_graph(self, input_shape):
+        input_ = tf.keras.layers.Input(shape=input_shape)
+        return tf.keras.models.Model(inputs=[input_], outputs=self.call(input_))
+
 
 def resnet18(num_classes):
     return ResNet(Basic_Block, [2, 2, 2, 2], num_classes=num_classes)
@@ -220,5 +225,7 @@ def resnet152(num_classes):
 
 if __name__ == '__main__':
     model = resnet18(num_classes=10)
-    model.build(input_shape=(None, 224, 224, 3))
+    model.build(input_shape=(None, 28, 28, 1))
     model.summary()
+    tf.keras.utils.plot_model(model.build_graph(input_shape=(28, 28, 1)), "deepLearning/tf/CV/resnet.png",
+                              show_shapes=True)

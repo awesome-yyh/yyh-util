@@ -26,9 +26,14 @@ class LeNet_5(keras.Model):
         x = self.f7(x)
         
         return x
+    def build_graph(self, input_shape):
+        input_ = tf.keras.layers.Input(shape=input_shape)
+        return tf.keras.models.Model(inputs=[input_], outputs=self.call(input_))
 
 
 if __name__ == '__main__':
     model = LeNet_5(num_classes=10)
     model.build(input_shape=(None, 28, 28, 1))
     model.summary()
+    tf.keras.utils.plot_model(model.build_graph(input_shape=(28, 28, 1)), "deepLearning/tf/CV/lenet.png",
+                              show_shapes=True)
