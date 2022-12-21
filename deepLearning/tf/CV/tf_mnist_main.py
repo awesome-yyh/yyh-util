@@ -4,7 +4,7 @@ import tensorflow as tf
 from tensorflow.keras.datasets import mnist
 from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
-from tf_ResNet import *
+from tf_ResNet import resnet18
 from tf_LeNet import LeNet_5
 
 
@@ -32,6 +32,16 @@ test_images=test_images/255.0
 training_images, val_images, training_labels, val_labels = train_test_split(
     training_images, training_labels, test_size=0.2, random_state=1, stratify=training_labels)
 
+# 组织tf.data.Dataset
+batch_size = 64
+train_dataset = tf.data.Dataset.from_tensor_slices((training_images, training_labels))
+train_dataset = train_dataset.shuffle(buffer_size=1024).batch(batch_size, drop_remainder=True)
+
+val_dataset = tf.data.Dataset.from_tensor_slices((val_images, val_labels))
+val_dataset = val_dataset.batch(batch_size, drop_remainder=True)
+
+test_dataset = tf.data.Dataset.from_tensor_slices((test_images, test_labels))
+test_dataset = test_dataset.batch(batch_size, drop_remainder=True)
 
 # 搭建模型
 model = LeNet_5(num_classes=10)
@@ -78,10 +88,9 @@ ckpt_callback = tf.keras.callbacks.ModelCheckpoint(
 #     # 若成功加载前面保存的参数，输出下列信息
 #     print("checkpoint_loaded")
 
-history = model.fit(training_images, training_labels, 
-                    validation_data = (val_images, val_labels),
+history = model.fit(train_dataset, validation_data = val_dataset,
                     callbacks=[early_stopping, tensorboard_callback, ckpt_callback],
-                    batch_size = 128, epochs=3, verbose=2)
+                    epochs=3, verbose=2)
 
 # # 模型评估和改进
 # # > tensorboard --logdir logs/mlp
@@ -109,7 +118,7 @@ history = model.fit(training_images, training_labels,
 # plt.legend()
 # plt.show()
 
-test_loss, test_acc = model.evaluate(test_images, test_labels, verbose=2)
+test_loss, test_acc = model.evaluate(test_dataset, verbose=2)
 print("=============")
 print("在测试集的准确率: ", test_acc)
 print("=============")

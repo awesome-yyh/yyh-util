@@ -8,7 +8,6 @@ class Basic_Block(keras.Model):
     '''
     def __init__(self, filters, block_name,
                 downsample=False, stride=1):
-        self.expasion = 1
         super().__init__()
         conv_name = 'res' + block_name + '_branch'
         bn_name = 'bn' + block_name + '_branch'
@@ -67,7 +66,6 @@ class Block(keras.Model):
     '''
     def __init__(self, filters, block_name,
                  downsample=False, stride=1, **kwargs):
-        self.expasion = 4
         super(Block, self).__init__(**kwargs)
 
         conv_name = 'res' + block_name + '_branch'

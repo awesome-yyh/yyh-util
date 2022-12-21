@@ -55,6 +55,17 @@ class TextSelfAtt(tf.keras.Model):
         output = self.classifier(x)
         return output
 
+    def get_config(self):
+        return {"maxlen": self.maxlen,
+                "max_features": self.max_features,
+                "embedding_dims": self.embedding_dims,
+                "class_num": self.class_num,
+                "dense_size": self.dense_size}
+    
+    @classmethod
+    def from_config(cls, config):
+        return cls(**config)
+    
     def build_graph(self, input_shape):
         input_ = tf.keras.layers.Input(shape=input_shape)
         return tf.keras.models.Model(inputs=[input_], outputs=self.call(input_))

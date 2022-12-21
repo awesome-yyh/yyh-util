@@ -39,15 +39,17 @@ class FastText(tf.keras.Model):
         h = self.dense(pool)
         output = self.classifier(h)
         return output
-
-    def build_graph(self, input_shape):
-        input_shape_nobatch = input_shape[1:]
-        self.build(input_shape)
-        inputs = tf.keras.Input(shape=input_shape_nobatch)
-        if not hasattr(self, 'call'):
-            raise AttributeError("User should define 'call' method in sub-class model!")
-        _ = self.call(inputs)
-
+    
+    def get_config(self):
+        return {"maxlen": self.maxlen,
+                "max_features": self.max_features,
+                "embedding_dims": self.embedding_dims,
+                "class_num": self.class_num}
+    
+    @classmethod
+    def from_config(cls, config):
+        return cls(**config)
+    
     def build_graph(self, input_shape):
         input_ = tf.keras.layers.Input(shape=input_shape)
         return tf.keras.models.Model(inputs=[input_], outputs=self.call(input_))
@@ -64,3 +66,6 @@ if __name__=='__main__':
     model.summary()
     tf.keras.utils.plot_model(model.build_graph(400), "deepLearning/tf/NLP/fasttext.png",
                               show_shapes=True)
+    config = model.get_config()
+    print(config)
+    

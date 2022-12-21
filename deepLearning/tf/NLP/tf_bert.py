@@ -107,7 +107,24 @@ if __name__=='__main__':
                     class_num=2,
                     last_activation='softmax',
     )
-    model.build(input_shape=[(None, 100),(None,100),(None,100)])
+    tokenizer = BertTokenizer.from_pretrained('bert-base-chinese')
+    inputs = tokenizer.encode_plus("你好", max_length=100, padding='max_length')
+    ipt = []
+    ipt.append(inputs['input_ids'])
+    ipt.append(inputs['input_ids'])
+    ipt = np.asarray(ipt, dtype=np.int32)
+
+    attn = []
+    attn.append(inputs['attention_mask'])
+    attn.append(inputs['attention_mask'])
+    attn = np.asarray(attn, dtype=np.int32)
+
+    ids = []
+    ids.append(inputs['token_type_ids'])
+    ids.append(inputs['token_type_ids'])
+    ids = np.asarray(ids, dtype=np.int32)
+    data = [ipt, attn, ids]
+    model.build(input_shape=[ipt.shape, attn.shape, ids.shape])
     model.summary()
-    tf.keras.utils.plot_model(model.build_graph(400), "deepLearning/tf/NLP/bert.png",
-                              show_shapes=True)
+    # tf.keras.utils.plot_model(model.build_graph(400), "deepLearning/tf/NLP/bert.png",
+                            #   show_shapes=True)

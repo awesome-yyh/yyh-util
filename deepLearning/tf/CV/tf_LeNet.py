@@ -6,6 +6,7 @@ class LeNet_5(keras.Model):
     def __init__(self, num_classes=10):
         super().__init__()
         self.num_classes = num_classes
+        
         self.c1 = keras.layers.Conv2D(filters=6, kernel_size=(5,5), padding='valid', activation="tanh")
         self.s2 = keras.layers.MaxPooling2D(pool_size=(2,2))
         self.c3 = keras.layers.Conv2D(filters=16, kernel_size=(5,5), padding='valid', activation="tanh")

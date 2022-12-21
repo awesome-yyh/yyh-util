@@ -54,6 +54,16 @@ training_texts, test_texts, training_labels, test_labels = train_test_split(X,y,
 training_texts, val_texts, training_labels, val_labels = train_test_split(
     training_texts, training_labels, test_size=0.2, random_state=1, stratify=training_labels)
 
+# 组织tf.data.Dataset
+batch_size = 64
+train_dataset = tf.data.Dataset.from_tensor_slices((training_texts, training_labels))
+train_dataset = train_dataset.shuffle(buffer_size=1024).batch(batch_size, drop_remainder=True)
+
+val_dataset = tf.data.Dataset.from_tensor_slices((val_texts, val_labels))
+val_dataset = val_dataset.batch(batch_size, drop_remainder=True)
+
+test_dataset = tf.data.Dataset.from_tensor_slices((test_texts, test_labels))
+test_dataset = test_dataset.batch(batch_size, drop_remainder=True)
 
 # 搭建模型
 model = FastText(maxlen=seq_len,
@@ -144,16 +154,18 @@ ckpt_callback = tf.keras.callbacks.ModelCheckpoint(
 #     model.load_weights(ckpt_file_path)
 #     # 若成功加载前面保存的参数，输出下列信息
 #     print("checkpoint_loaded")
-
-history = model.fit(training_texts, training_labels, 
-                    validation_data = (val_texts, val_labels),
+class_weight={
+    0:1.0,
+    1:1.0
+}
+history = model.fit(train_dataset, validation_data = val_dataset,
                     callbacks=[early_stopping, tensorboard_callback, ckpt_callback],
-                    batch_size = 128, epochs=3, verbose=2)
+                    class_weight=class_weight, epochs=3, verbose=2)
 
 # 模型评估和改进
 # > tensorboard --logdir logs/mlp
 
-test_loss, test_acc = model.evaluate(test_texts, test_labels, verbose=2)
+test_loss, test_acc = model.evaluate(test_dataset, verbose=2)
 print("=============")
 print("在测试集的准确率: ", test_acc)
 print("=============")
