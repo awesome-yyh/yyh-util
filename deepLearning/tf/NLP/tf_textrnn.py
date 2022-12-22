@@ -2,13 +2,6 @@ import  tensorflow as tf
 from tensorflow.keras.layers import Embedding, Dense, GRU, Bidirectional, GlobalAveragePooling1D
 
 
-def point_wise_feed_forward_network(dense_size):
-    ffn = tf.keras.Sequential()
-    for size in dense_size:
-        ffn.add(Dense(size, activation='relu'))
-    return ffn
-
-
 class TextRNN(tf.keras.Model):
 
     def __init__(self,
@@ -16,8 +9,7 @@ class TextRNN(tf.keras.Model):
                  max_features,
                  embedding_dims,
                  class_num,
-                 last_activation='softmax',
-                 dense_size=None
+                 last_activation='softmax'
                  ):
         '''
         :param maxlen: 文本最大长度
@@ -32,13 +24,11 @@ class TextRNN(tf.keras.Model):
         self.embedding_dims = embedding_dims
         self.class_num = class_num
         self.last_activation = last_activation
-        self.dense_size = dense_size
 
         self.embedding = Embedding(input_dim=self.max_features, output_dim=self.embedding_dims, input_length=self.maxlen)
         self.bi_rnn = Bidirectional(layer=GRU(units=128, activation='tanh', return_sequences=True), merge_mode='concat' ) # LSTM or GRU
-        # self.avepool = GlobalAveragePooling1D()
-        if self.dense_size is not None:
-            self.ffn = point_wise_feed_forward_network(dense_size)
+        self.avepool = GlobalAveragePooling1D()
+        self.dense = Dense(128, activation='relu')
         self.classifier = Dense(self.class_num, activation=self.last_activation)
 
     def call(self, inputs, training=None, mask=None):
@@ -49,10 +39,8 @@ class TextRNN(tf.keras.Model):
 
         emb = self.embedding(inputs)
         x = self.bi_rnn(emb)
-        # x = self.avepool(x)
-        x = tf.reduce_mean(x, axis=1)
-        if self.dense_size is not None:
-            x = self.ffn(x)
+        x = self.avepool(x)
+        x = self.dense(x)
         output = self.classifier(x)
         return output
     
@@ -60,8 +48,8 @@ class TextRNN(tf.keras.Model):
         return {"maxlen": self.maxlen,
                 "max_features": self.max_features,
                 "embedding_dims": self.embedding_dims,
-                "class_num": self.class_num,
-                "dense_size": self.dense_size}
+                "class_num": self.class_num
+                }
     
     @classmethod
     def from_config(cls, config):
@@ -78,8 +66,6 @@ if __name__=='__main__':
                     embedding_dims=100,
                     class_num=2,
                     last_activation='softmax',
-                    dense_size=[128, 64],
-                    # dense_size = None
                     )
     model.build(input_shape=(None, 400))
     model.summary()

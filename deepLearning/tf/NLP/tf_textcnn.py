@@ -34,9 +34,10 @@ class TextCNN(tf.keras.Model):
         for kernel_size in kernel_sizes:
             self.conv1s.append(Conv1D(filters=128, kernel_size=kernel_size, activation='relu', kernel_regularizer=kernel_regularizer))
             self.maxpools.append(GlobalMaxPooling1D())
+        # self.bn = tf.keras.layers.BatchNormalization()
         self.classifier = Dense(class_num, activation=last_activation, )
 
-    def call(self, inputs, training=None, mask=None):
+    def call(self, inputs, training=True, mask=None):
         if len(inputs.get_shape()) != 2:
             raise ValueError('The rank of inputs of TextCNN must be 2, but now is %d' % len(inputs.get_shape()))
         if inputs.get_shape()[1] != self.maxlen:
@@ -49,6 +50,7 @@ class TextCNN(tf.keras.Model):
             c = self.maxpools[i](c)
             conv1s.append(c)
         x = Concatenate()(conv1s)
+        # x = self.bn(x, training=training)
         output = self.classifier(x)
         return output
     

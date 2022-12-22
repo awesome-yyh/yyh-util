@@ -1,12 +1,6 @@
 import  tensorflow as tf
-from tensorflow.keras.layers import Embedding, MultiHeadAttention, Dense
+from tensorflow.keras.layers import Embedding, MultiHeadAttention, Dense, GlobalAveragePooling1D
 
-
-def point_wise_feed_forward_network(dense_size):
-    ffn = tf.keras.Sequential()
-    for size in dense_size:
-        ffn.add(Dense(size, activation='relu'))
-    return ffn
 
 class TextSelfAtt(tf.keras.Model):
 
@@ -14,9 +8,9 @@ class TextSelfAtt(tf.keras.Model):
                  maxlen,
                  max_features,
                  embedding_dims,
+                 num_heads,
                  class_num,
-                 last_activation='softmax',
-                 dense_size=None
+                 last_activation='softmax'
                  ):
         '''
         :param maxlen: 文本最大长度
@@ -29,15 +23,14 @@ class TextSelfAtt(tf.keras.Model):
         self.maxlen = maxlen
         self.max_features = max_features
         self.embedding_dims = embedding_dims
+        self.num_heads = num_heads
         self.class_num = class_num
         self.last_activation = last_activation
-        self.dense_size = dense_size
 
         self.embedding = Embedding(input_dim=self.max_features, output_dim=self.embedding_dims, input_length=self.maxlen)
-        self.attention = MultiHeadAttention(num_heads=4, key_dim=embedding_dims)
-        
-        if self.dense_size is not None:
-            self.ffn = point_wise_feed_forward_network(dense_size)
+        self.attention = MultiHeadAttention(num_heads=self.num_heads, key_dim=self.embedding_dims)
+        self.avepool = GlobalAveragePooling1D()
+        self.dense = Dense(128, activation='relu')
         self.classifier = Dense(self.class_num, activation=self.last_activation)
 
     def call(self, inputs, training=None, mask=None):
@@ -48,10 +41,8 @@ class TextSelfAtt(tf.keras.Model):
 
         x = self.embedding(inputs)
         x = self.attention(x, x, x)
-        x = tf.reduce_mean(x, axis=1)
-        # x = tf.reshape(x,  shape=(-1, 400*self.maxlen))
-        if self.dense_size is not None:
-            x = self.ffn(x)
+        x = self.avepool(x)
+        x = self.dense(x)
         output = self.classifier(x)
         return output
 
@@ -59,8 +50,9 @@ class TextSelfAtt(tf.keras.Model):
         return {"maxlen": self.maxlen,
                 "max_features": self.max_features,
                 "embedding_dims": self.embedding_dims,
-                "class_num": self.class_num,
-                "dense_size": self.dense_size}
+                "num_heads": self.num_heads,
+                "class_num": self.class_num
+                }
     
     @classmethod
     def from_config(cls, config):
@@ -75,10 +67,9 @@ if __name__=='__main__':
     model = TextSelfAtt(maxlen=400,
                         max_features=5000,
                         embedding_dims=400,
+                        num_heads=4,
                         class_num=2,
-                        last_activation='softmax',
-                        dense_size=[128, 64],
-                        # dense_size = None
+                        last_activation='softmax'
                         )
     model.build(input_shape=(None, 400))
     model.summary()

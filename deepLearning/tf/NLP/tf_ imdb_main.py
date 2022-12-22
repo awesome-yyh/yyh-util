@@ -12,7 +12,6 @@ from tf_textcnn import TextCNN
 from tf_textrnn import TextRNN
 from tf_textSelfAtt import TextSelfAtt
 from tf_transformer import TextTransformerEncoder
-from tf_bert import convert_examples_to_features, TFBertForTokenClassification
 
 
 """
@@ -43,12 +42,6 @@ X = pad_sequences(X, maxlen=seq_len, padding='post')
 # padding：'pre'或'post'，确定当需要补0时，在序列的起始还是结尾补
 y = pd.get_dummies(data_df['label']).values
 
-# bert
-# tokenizer = BertTokenizer.from_pretrained("klue/bert-base")
-# X, y = convert_examples_to_features(
-#     train_data_sentence, train_data_label, max_seq_len=128, tokenizer=tokenizer
-# )
-
 # 划分训练集、验证集、测试集
 training_texts, test_texts, training_labels, test_labels = train_test_split(X,y, test_size = 0.20, random_state = 42)
 training_texts, val_texts, training_labels, val_labels = train_test_split(
@@ -66,11 +59,11 @@ test_dataset = tf.data.Dataset.from_tensor_slices((test_texts, test_labels))
 test_dataset = test_dataset.batch(batch_size, drop_remainder=True)
 
 # 搭建模型
-model = FastText(maxlen=seq_len,
-                max_features=max_words,
-                embedding_dims=100,
-                class_num=2,
-                last_activation='softmax')
+# model = FastText(maxlen=seq_len,
+#                 max_features=max_words,
+#                 embedding_dims=100,
+#                 class_num=2,
+#                 last_activation='softmax')
 
 # model = TextCNN(maxlen=seq_len,
 #                 max_features=max_words,
@@ -84,34 +77,25 @@ model = FastText(maxlen=seq_len,
 #                 max_features=max_words,
 #                 embedding_dims=100,
 #                 class_num=2,
-#                 last_activation='softmax',
-#                 # dense_size=[128, 64],
-#                 dense_size = None)
+#                 last_activation='softmax'
+#                 )
 
 # model = TextSelfAtt(maxlen=seq_len,
 #                     max_features=max_words,
 #                     embedding_dims=400,
+#                     num_heads=4,
 #                     class_num=2,
-#                     last_activation='softmax',
-#                     dense_size=[128, 64],
-#                     # dense_size = None
+#                     last_activation='softmax'
 #                     )
 
-# model = TextTransformerEncoder(maxlen=seq_len,
-#                     max_features=max_words,
-#                     embedding_dims=400,
-#                     num_heads=2,
-#                     class_num=2,
-#                     last_activation='softmax',
-#                     dense_size=[128, 64],
-#                     # dense_size = None
-#                     )
+model = TextTransformerEncoder(maxlen=seq_len,
+                    max_features=max_words,
+                    embedding_dims=400,
+                    num_heads=2,
+                    class_num=2,
+                    last_activation='softmax'
+                    )
 
-# pretrained_model_name = "hfl/chinese-roberta-wwm-ext"
-# model = TFBertForTokenClassification(model_name=pretrained_model_name,
-#                 class_num=2,
-#                 last_activation='softmax',
-# )
 
 # 查看模型结构
 model.build(input_shape=(None, seq_len))
@@ -160,7 +144,7 @@ class_weight={
 }
 history = model.fit(train_dataset, validation_data = val_dataset,
                     callbacks=[early_stopping, tensorboard_callback, ckpt_callback],
-                    class_weight=class_weight, epochs=3, verbose=2)
+                    class_weight=class_weight, epochs=3, verbose=1)
 
 # 模型评估和改进
 # > tensorboard --logdir logs/mlp

@@ -2,14 +2,6 @@ import  tensorflow as tf
 from tensorflow.keras.layers import LayerNormalization, MultiHeadAttention, Dense, Dropout, Embedding, GlobalAveragePooling1D
 
 
-def point_wise_feed_forward_network(dense_size):
-    ffn = tf.keras.Sequential()
-    for size in dense_size:
-        ffn.add(Dense(size, activation='relu'))
-        ffn.add(Dropout(0.1))
-    return ffn
-
-
 class TokenAndPositionEmbedding(tf.keras.layers.Layer):
     def __init__(self, maxlen, vocab_size, embed_dim):
         super().__init__()
@@ -48,7 +40,7 @@ class TransformerBlock(tf.keras.layers.Layer):
         self.att = MultiHeadAttention(num_heads=num_heads, key_dim=embed_dim)
         self.ffn = tf.keras.Sequential(
             [Dense(dense_dim, activation="relu"), 
-             Dense(embed_dim),]
+            Dense(embed_dim),]
         )
         self.layernorm1 = LayerNormalization(epsilon=1e-6)
         self.layernorm2 = LayerNormalization(epsilon=1e-6)
@@ -83,8 +75,7 @@ class TextTransformerEncoder(tf.keras.Model):
                  embedding_dims,
                  num_heads,
                  class_num,
-                 last_activation='softmax',
-                 dense_size=None,
+                 last_activation='softmax'
                  ):
         '''
         :param maxlen: 文本最大长度
@@ -99,14 +90,13 @@ class TextTransformerEncoder(tf.keras.Model):
         self.max_features = max_features
         self.embedding_dims = embedding_dims
         self.class_num = class_num
+        self.num_heads = num_heads
         self.last_activation = last_activation
-        self.dense_size = dense_size
         
         self.embedding_layer = TokenAndPositionEmbedding(maxlen, max_features, embedding_dims)
-        self.transformer_block = TransformerBlock(embedding_dims, num_heads, 32)
-        # self.avepool = GlobalAveragePooling1D()
-        if self.dense_size is not None:
-            self.ffn = point_wise_feed_forward_network(dense_size)
+        self.transformer_block = TransformerBlock(embedding_dims, num_heads, dense_dim=32)
+        self.avepool = GlobalAveragePooling1D()
+        self.dense = Dense(128, activation='relu')
         self.classifier = Dense(self.class_num, activation=self.last_activation)
         
     def call(self, inputs, training=None, mask=None):
@@ -117,10 +107,8 @@ class TextTransformerEncoder(tf.keras.Model):
 
         x = self.embedding_layer(inputs)
         x = self.transformer_block(x)
-        # x = self.avepool()(x)
-        x = tf.reduce_mean(x, axis=1)
-        if self.dense_size is not None:
-            x = self.ffn(x)
+        x = self.avepool(x)
+        x = self.dense(x)
         output = self.classifier(x)
         return output
     
@@ -135,9 +123,7 @@ if __name__=='__main__':
                         embedding_dims=400,
                         num_heads=2,
                         class_num=2,
-                        last_activation='softmax',
-                        dense_size=[128, 64],
-                        # dense_size = None
+                        last_activation='softmax'
                         )
     model.build(input_shape=(None, 400))
     model.summary()

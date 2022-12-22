@@ -22,12 +22,13 @@ class FastText(tf.keras.Model):
         self.max_features = max_features
         self.embedding_dims = embedding_dims
         self.class_num = class_num
+        self.last_activation = last_activation
         
-        self.embedding = Embedding(input_dim=max_features, output_dim=embedding_dims, input_length=maxlen)
+        self.embedding = Embedding(input_dim=self.max_features, output_dim=self.embedding_dims, input_length=self.maxlen)
         self.pooling = GlobalAveragePooling1D()
         self.dense = Dense(128, activation='relu')
-        self.classifier = Dense(self.class_num, activation=last_activation)
-
+        self.classifier = Dense(self.class_num, activation=self.last_activation)
+        
     def call(self, inputs, training=None, mask=None):
         if len(inputs.get_shape()) != 2:
             raise ValueError('The rank of inputs of FastText must be 2, but now is %d' % len(inputs.get_shape()))
