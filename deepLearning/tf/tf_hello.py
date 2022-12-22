@@ -109,15 +109,15 @@ print('result 2:', CustomDropout(0.5)(A))
 # layers.Flatten
 print("------layers.Flatten-------")
 
-# layers.Conv2D
-print("------layers.Conv2D-------")
-
 print("------layers.GlobalAveragePooling1D-------")
 A = tf.constant([[[1.0, 2.0], 
                  [3.0, 4.0]]])
 
 print('result 1:', tf.keras.layers.GlobalAveragePooling1D()(A))
 print('result 2:', tf.reduce_mean(A, axis=1))
+
+# layers.Conv2D
+print("------layers.Conv2D-------")
 
 # layers.MaxPooling2D
 print("------layers.MaxPooling2D-------")
