@@ -92,8 +92,7 @@ def data_preprocess(data_df, max_words=10000, seq_len=100, batch_size=64):
 def data_preprocess_bert(data_df, pretrained_model_name, from_pt=False, seq_len=100, batch_size=64):
     data_df = clean_data(data_df, ['review'])
     
-    TOKENIZER = BertTokenizer.from_pretrained(pretrained_model_name,from_pt=from_pt)
-    train_input_ids, train_attention_masks, token_type_ids = bert_encode(TOKENIZER, data_df['review'].values, seq_len)
+    train_input_ids, train_attention_masks, token_type_ids = bert_encode(pretrained_model_name, data_df['review'].values, seq_len)
     y = pd.get_dummies(data_df['label']).values
     # print(train_input_ids.shape, train_attention_masks.shape, y.shape) # (45000, 100) (45000, 100) (45000, 2)
 

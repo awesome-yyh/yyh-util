@@ -4,7 +4,8 @@ import tensorflow as tf
 from transformers import TFBertModel, BertTokenizer
 
 
-def bert_encode(TOKENIZER, data, maximum_len):
+def bert_encode(pretrained_model_name, data, maximum_len):
+    TOKENIZER = BertTokenizer.from_pretrained(pretrained_model_name)
     input_ids = []
     attention_masks = []
     token_type_ids = []
@@ -25,23 +26,28 @@ def bert_encode(TOKENIZER, data, maximum_len):
     return np.array(input_ids), np.array(attention_masks), np.array(token_type_ids)
 
 
-def bert_model(pretrained_model_name, maxlen, class_num, from_pt=False, last_activation='softmax'):
+def bert_model(pretrained_model_name, seq_len, class_num, from_pt=False, last_activation='softmax'):
+    input_ids = tf.keras.Input(shape=(seq_len,), dtype='int32', name="input_ids")
+    attention_masks = tf.keras.Input(shape=(seq_len,), dtype='int32', name="attention_masks")
+    attention_types = tf.keras.Input(shape=(seq_len,), dtype='int32', name="attention_types")
 
-    input_ids = tf.keras.Input(shape=(maxlen,), dtype='int32', name="input_ids")
-    attention_masks = tf.keras.Input(shape=(maxlen,), dtype='int32', name="attention_masks")
-    attention_types = tf.keras.Input(shape=(maxlen,), dtype='int32', name="attention_types")
-
-    bert_base = TFBertModel.from_pretrained(pretrained_model_name, from_pt=from_pt)
-    transformer_layer = bert_base([input_ids, attention_masks, attention_types])
-
-    output = transformer_layer[1]
-
-    # output = tf.keras.layers.Dense(128, activation='relu')(output)
-    # output = tf.keras.layers.Dropout(0.2)(output)
-
-    output = tf.keras.layers.Dense(class_num, activation=last_activation)(output)
-
-    model = tf.keras.models.Model(inputs=[input_ids, attention_masks, attention_types], outputs=output)
+    bert_model = TFBertModel.from_pretrained(pretrained_model_name, from_pt=from_pt, output_hidden_states=False)
+    
+    bert_output = bert_model(input_ids, attention_mask=attention_masks, token_type_ids=attention_types)
+    # bert_output[0]: 各个token的向量
+    # bert_output[1]: 第一个token的向量
+    # bert_output[2]: 各层的输出, 需要设置output_hidden_states=True
+    
+    # x = tf.keras.layers.GlobalAveragePooling1D()(bert_output[0])
+    x = bert_output[1]
+    # x = tf.keras.layers.Concatenate(axis=2)(bert_output[2])
+    # x = tf.keras.layers.GlobalAveragePooling1D()(x)
+    
+    x = tf.keras.layers.Dense(128, activation='relu')(x)
+    x = tf.keras.layers.Dropout(0.15)(x)
+    classifier = tf.keras.layers.Dense(class_num, activation=last_activation)(x)
+    
+    model = tf.keras.models.Model(inputs=[input_ids, attention_masks, attention_types], outputs=classifier)
 
     return model
 
@@ -49,12 +55,10 @@ def bert_model(pretrained_model_name, maxlen, class_num, from_pt=False, last_act
 if __name__=='__main__':
     # pretrained_model_name, from_pt = "hfl/chinese-roberta-wwm-ext", False
     pretrained_model_name, from_pt = "prajjwal1/bert-tiny", True
-    
     data = ["今天是冬至，吃饺子"]
     seq_len = 100
     
-    TOKENIZER = BertTokenizer.from_pretrained(pretrained_model_name)
-    train_input_ids, train_attention_masks, token_type_ids = bert_encode(TOKENIZER, data, seq_len)
+    train_input_ids, train_attention_masks, token_type_ids = bert_encode(pretrained_model_name, data, seq_len)
     print(train_input_ids, train_attention_masks, token_type_ids, train_input_ids.shape)
     
     model = bert_model(pretrained_model_name, seq_len, 2, from_pt=True)

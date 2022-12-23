@@ -10,7 +10,7 @@ from tf_textcnn import TextCNN
 from tf_textrnn import TextRNN
 from tf_textSelfAtt import TextSelfAtt
 from tf_transformer import TextTransformerEncoder
-from tf_bert import bert_encode, bert_model
+from tf_bert import bert_model
 
 
 """
@@ -35,12 +35,12 @@ print(data_df['label'].value_counts(normalize=True))
 # 特征工程(数值、类别、时间、文本、图像)(bert)
 # pretrained_model_name, from_pt = "hfl/chinese-roberta-wwm-ext", False
 
-# pretrained_model_name, from_pt = "prajjwal1/bert-tiny", True # (L=2, H=128)
+pretrained_model_name, from_pt = "prajjwal1/bert-tiny", True # (L=2, H=128)
 # pretrained_model_name, from_pt = "prajjwal1/bert-mini", True # (L=4, H=256)
 # pretrained_model_name, from_pt = "prajjwal1/bert-small", True # (L=4, H=512)
 # pretrained_model_name, from_pt = "prajjwal1/bert-medium", True # (L=8, H=512) 
 
-pretrained_model_name, from_pt = "google/bert_uncased_L-2_H-128_A-2", True # (BERT-Tiny)
+# pretrained_model_name, from_pt = "google/bert_uncased_L-2_H-128_A-2", True # (BERT-Tiny) uncased代表需要转小写字母再用
 # pretrained_model_name, from_pt = "google/bert_uncased_L-2_H-768_A-12", True # (BERT-Mini)
 # pretrained_model_name, from_pt = "google/bert_uncased_L-4_H-512_A-8", True # (BERT-Small)
 # pretrained_model_name, from_pt = "google/bert_uncased_L-8_H-512_A-8", True # (BERT-Medium)
@@ -89,7 +89,7 @@ max_words=10000
 #                     )
 
 model = bert_model(pretrained_model_name=pretrained_model_name,
-                    maxlen=seq_len, 
+                    seq_len=seq_len, 
                     class_num=2, 
                     from_pt=from_pt,
                     last_activation='softmax'

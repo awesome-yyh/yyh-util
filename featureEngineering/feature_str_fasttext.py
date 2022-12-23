@@ -3,7 +3,7 @@ raw_documents = ["今天是星期天。",
                  "今天是星期日。",
                  "明天的明天要考试！"]
 
-print("正在分词")
+print("正在jieba分词")
 import jieba
 import re # 去掉各种标点符号，只保留文字
 
@@ -12,19 +12,19 @@ texts = [' '.join([word for word in jieba.cut(re.sub(r'[^\w]','', document), cut
 print("sklearn texts:", texts)
 
 # 词袋模型
-print("词袋模型:")
+print("sklearn-词袋模型:")
 from sklearn.feature_extraction.text import CountVectorizer
 Count= CountVectorizer() # countvectorizer是一个向量化的计数器
 X = Count.fit_transform(texts)
-print(Count.get_feature_names()) # 分词列表
+# print(Count.get_feature_names()) # 分词列表
 print(X.toarray()) # 句子向量
 
 # TF-IDF
-print("TF-IDF:")
+print("sklearn-TF-IDF:")
 from sklearn.feature_extraction.text import TfidfVectorizer
 tfidf = TfidfVectorizer()
 X = tfidf.fit_transform(texts)
-print(tfidf.get_feature_names()) # 得到分词
+# print(tfidf.get_feature_names()) # 得到分词
 print(X.toarray()) # 得到各句子的tiidf向量
 
 # 将文本处理成gensim格式: [['今天', '是', '星期天'], ['今天', '是', '星期日']]
@@ -32,7 +32,7 @@ texts = [[word for word in jieba.cut(re.sub(r'[^\w]','', document), cut_all=Fals
 print("gensim texts:", texts)
 
 # 词袋模型
-print("词袋模型:")
+print("gensim-词袋模型:")
 from gensim import corpora, models, similarities
 dictionary = corpora.Dictionary(texts)
 corpus = [dictionary.doc2bow(text) for text in texts]
@@ -50,7 +50,7 @@ print(dictionary.token2id)
 print(corpus)
 
 # TF-IDF
-print("TF-IDF:")
+print("gensim-TF-IDF:")
 tfidfModel = models.TfidfModel(corpus)
 
 tfidfModel.save("./models/model.tfidf") # 模型保存和加载
@@ -60,7 +60,7 @@ corpus_tfidf = [tfidfModel[doc] for doc in corpus]
 print(corpus_tfidf)
 
 # word2vec
-print("word2vec:")
+print("gensim-word2vec:")
 from gensim.models.word2vec import Word2Vec
 
 w2vModel = Word2Vec(texts, min_count=1) # 先遍历一次语料库建立词典，再遍历语料库训练神经网络模型
@@ -72,7 +72,7 @@ print(w2vModel.wv['今天']) # 只能处理训练过的词
 print(w2vModel.wv['今天'].shape)
 
 # fasttext
-print("fasttext:")
+print("gensim-fasttext:")
 from gensim.models.fasttext import FastText
 
 ftModel = FastText(texts, vector_size=100, window=5, min_count=1, workers=4,sg=1)
