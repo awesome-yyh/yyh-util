@@ -45,10 +45,10 @@ def bert_model(pretrained_model_name, seq_len, class_num, from_pt=False, last_ac
     
     x = tf.keras.layers.Dense(128, activation='relu')(x)
     x = tf.keras.layers.Dropout(0.15)(x)
-    classifier = tf.keras.layers.Dense(class_num, activation=last_activation)(x)
+    classifier = tf.keras.layers.Dense(class_num, activation=last_activation, name="output_1")(x)
     
     model = tf.keras.models.Model(inputs=[input_ids, attention_masks, attention_types], outputs=classifier)
-    
+
     return model
 
 

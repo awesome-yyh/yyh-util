@@ -27,7 +27,7 @@ class FastText(tf.keras.Model):
         self.embedding = Embedding(input_dim=self.max_features, output_dim=self.embedding_dims, input_length=self.maxlen)
         self.pooling = GlobalAveragePooling1D()
         self.dense = Dense(128, activation='relu')
-        self.classifier = Dense(self.class_num, activation=self.last_activation)
+        self.classifier = Dense(self.class_num, activation=self.last_activation, name="classifier")
         
     def call(self, inputs):
         if len(inputs.get_shape()) != 2:
@@ -39,7 +39,7 @@ class FastText(tf.keras.Model):
         pool = self.pooling(emb)
         h = self.dense(pool)
         output = self.classifier(h)
-        return output
+        return [output]
     
     def get_config(self):
         return {"maxlen": self.maxlen,

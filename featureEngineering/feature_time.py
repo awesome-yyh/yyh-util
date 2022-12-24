@@ -32,3 +32,4 @@ time2 = pd.to_datetime(time_end)
 delta_time = time2 - time1
 # 转换为int
 delta_time = delta_time.days
+# 时间段再分桶

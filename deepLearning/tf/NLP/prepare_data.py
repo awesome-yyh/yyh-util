@@ -109,15 +109,18 @@ def data_preprocess_bert(data_df, pretrained_model_name, from_pt=False, seq_len=
 
     # 组织tf.data.Dataset(bert)
     train_dataset = tf.data.Dataset.from_tensor_slices((
-        {"input_ids":training_texts_ids, "attention_masks": training_texts_masks, "attention_types":training_texts_types}, training_labels))
+        {"input_ids":training_texts_ids, "attention_masks": training_texts_masks, "attention_types":training_texts_types}, 
+        training_labels))
     train_dataset = train_dataset.shuffle(buffer_size=1024).batch(batch_size, drop_remainder=True)
 
     val_dataset = tf.data.Dataset.from_tensor_slices((
-        {"input_ids":val_texts_ids, "attention_masks": val_texts_masks, "attention_types":val_texts_types}, val_labels))
+        {"input_ids":val_texts_ids, "attention_masks": val_texts_masks, "attention_types":val_texts_types}, 
+        val_labels))
     val_dataset = val_dataset.batch(batch_size, drop_remainder=True)
 
     test_dataset = tf.data.Dataset.from_tensor_slices((
-        {"input_ids":test_texts_ids, "attention_masks": test_texts_masks, "attention_types":test_texts_types}, test_labels))
+        {"input_ids":test_texts_ids, "attention_masks": test_texts_masks, "attention_types":test_texts_types}, 
+        test_labels))
     test_dataset = test_dataset.batch(batch_size, drop_remainder=True)
 
     return train_dataset, val_dataset, test_dataset

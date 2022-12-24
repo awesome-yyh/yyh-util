@@ -33,9 +33,9 @@ print(data_df['label'].value_counts(normalize=True))
 # train_dataset, val_dataset, test_dataset = data_preprocess(data_df)
 
 # 特征工程(数值、类别、时间、文本、图像)(bert)
-# pretrained_model_name, from_pt = "hfl/chinese-roberta-wwm-ext", False
+pretrained_model_name, from_pt = "hfl/chinese-roberta-wwm-ext", False
 
-pretrained_model_name, from_pt = "prajjwal1/bert-tiny", True # (L=2, H=128)
+# pretrained_model_name, from_pt = "prajjwal1/bert-tiny", True # (L=2, H=128)
 # pretrained_model_name, from_pt = "prajjwal1/bert-mini", True # (L=4, H=256)
 # pretrained_model_name, from_pt = "prajjwal1/bert-small", True # (L=4, H=512)
 # pretrained_model_name, from_pt = "prajjwal1/bert-medium", True # (L=8, H=512) 
@@ -102,7 +102,8 @@ model = bert_model(pretrained_model_name=pretrained_model_name,
 #                         show_shapes=True)
 
 model.compile(optimizer = tf.keras.optimizers.Adam(learning_rate=1e-3), 
-              loss = "categorical_crossentropy",
+              loss = {"output_1": "categorical_crossentropy"},
+              loss_weights=[1.0], # 为每个损失分配不同的权重
               metrics=['accuracy'])
 
 # 训练模型
