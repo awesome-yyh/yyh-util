@@ -29,7 +29,7 @@ class FastText(tf.keras.Model):
         self.dense = Dense(128, activation='relu')
         self.classifier = Dense(self.class_num, activation=self.last_activation)
         
-    def call(self, inputs, training=None, mask=None):
+    def call(self, inputs):
         if len(inputs.get_shape()) != 2:
             raise ValueError('The rank of inputs of FastText must be 2, but now is %d' % len(inputs.get_shape()))
         if inputs.get_shape()[1] != self.maxlen:

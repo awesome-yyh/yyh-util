@@ -37,7 +37,7 @@ class TextCNN(tf.keras.Model):
         # self.bn = tf.keras.layers.BatchNormalization()
         self.classifier = Dense(class_num, activation=last_activation, )
 
-    def call(self, inputs, training=True, mask=None):
+    def call(self, inputs):
         if len(inputs.get_shape()) != 2:
             raise ValueError('The rank of inputs of TextCNN must be 2, but now is %d' % len(inputs.get_shape()))
         if inputs.get_shape()[1] != self.maxlen:
