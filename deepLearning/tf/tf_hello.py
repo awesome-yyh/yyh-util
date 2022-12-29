@@ -60,6 +60,23 @@ with tf.GradientTape() as tape: # 在 tf.GradientTape() 的上下文内，所有
     print(y) # 9
 print(tape.gradient(y, x))   # 计算y关于x的导数, 6
 
+# @tf.function
+print("------@tf.function-------")
+class F():
+    def __init__(self):
+        self._b = None
+    @tf.function
+    def __call__(self):
+        a = tf.constant([[10, 10], [11., 1.]])
+        x = tf.constant([[1., 0.], [0., 1.]])
+        if self._b is None:
+            self._b = tf.Variable(12.)
+        y = tf.matmul(a, x) + self._b
+        print("PRINT: ", y)
+        tf.print("TF-PRINT: ", y)
+        return y
+f = F()
+print(f())
 
 # 模型演示-线性回归
 print("------模型演示-线性回归-------")

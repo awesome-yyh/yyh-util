@@ -22,7 +22,7 @@ def myWord(fileName):
 
   print("正在导入停用词文件")
   # 导入停词，用于去掉文本中类似于'啊'、'你'，'我'之类的词
-  stop_words = open("./resource/stop_words_zh.txt",encoding="utf8").read().split("\n")
+  stop_words = open("data/stop_words_zh.txt",encoding="utf8").read().split("\n")
 
   print("正在生成词云")
   # 使用WordCloud生成普通词云
