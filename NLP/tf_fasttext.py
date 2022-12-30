@@ -65,7 +65,7 @@ if __name__=='__main__':
     )
     model.build(input_shape=(None, 400))
     model.summary()
-    tf.keras.utils.plot_model(model.build_graph(400), "deepLearning/tf/NLP/fasttext.png",
+    tf.keras.utils.plot_model(model.build_graph(400), "NLP/fasttext.png",
                               show_shapes=True)
     config = model.get_config()
     print(config)

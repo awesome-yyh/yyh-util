@@ -80,5 +80,5 @@ if __name__=='__main__':
                 last_activation='softmax')
     model.build(input_shape=(None, 400))
     model.summary()
-    tf.keras.utils.plot_model(model.build_graph(input_shape=400), "deepLearning/tf/NLP/text_cnn.png",
+    tf.keras.utils.plot_model(model.build_graph(input_shape=400), "NLP/text_cnn.png",
                               show_shapes=True)

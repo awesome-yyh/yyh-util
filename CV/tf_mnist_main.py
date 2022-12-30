@@ -50,7 +50,7 @@ model = LeNet_5(num_classes=10)
 # 查看模型结构
 model.build(input_shape=(None, 28, 28, 1))
 model.summary()
-# tf.keras.utils.plot_model(model, "deepLearning/tf/CV/model.png", show_shapes=True)
+# tf.keras.utils.plot_model(model, "CV/model.png", show_shapes=True)
 
 model.compile(optimizer = tf.keras.optimizers.Adam(learning_rate=1e-3), 
               loss = tf.keras.losses.sparse_categorical_crossentropy, 

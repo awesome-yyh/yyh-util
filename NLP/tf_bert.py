@@ -63,6 +63,6 @@ if __name__=='__main__':
     
     model = bert_model(pretrained_model_name, seq_len, 2, from_pt=True)
     model.summary()
-    tf.keras.utils.plot_model(model, "deepLearning/tf/NLP/bert.png",
+    tf.keras.utils.plot_model(model, "NLP/bert.png",
                               show_shapes=True)
     

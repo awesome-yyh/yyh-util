@@ -69,5 +69,5 @@ if __name__=='__main__':
                     )
     model.build(input_shape=(None, 400))
     model.summary()
-    tf.keras.utils.plot_model(model.build_graph(input_shape=400), "deepLearning/tf/NLP/text_rnn.png",
+    tf.keras.utils.plot_model(model.build_graph(input_shape=400), "NLP/text_rnn.png",
                               show_shapes=True)

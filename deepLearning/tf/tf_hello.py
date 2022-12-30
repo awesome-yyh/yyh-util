@@ -1,3 +1,4 @@
+import os
 import tensorflow as tf
 from tensorflow.python.client import device_lib
 import numpy as np
@@ -18,8 +19,9 @@ print("Tensorflow is built with CUDA: ", tf.test.is_built_with_cuda())
 print("CPU or GPU: \n", device_lib.list_local_devices())
 print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
 for gpu in tf.config.experimental.list_physical_devices('GPU'):
-    tf.config.experimental.set_memory_growth(gpu, True) # 根据需要来逐渐增长GPU内存
+    tf.config.experimental.set_memory_growth(gpu, True) # 设置显存分配, 根据需要来逐渐增长GPU内存
 # tf.debugging.set_log_device_placement(True) # 打印使用的设备CPU/GPU
+os.environ['CUDA_VISIBLE_DEVICES']='2'
 
 
 # 四则运算

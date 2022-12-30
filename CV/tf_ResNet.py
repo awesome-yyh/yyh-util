@@ -225,5 +225,5 @@ if __name__ == '__main__':
     model = resnet18(num_classes=10)
     model.build(input_shape=(None, 28, 28, 1))
     model.summary()
-    tf.keras.utils.plot_model(model.build_graph(input_shape=(28, 28, 1)), "deepLearning/tf/CV/resnet.png",
+    tf.keras.utils.plot_model(model.build_graph(input_shape=(28, 28, 1)), "CV/resnet.png",
                               show_shapes=True)

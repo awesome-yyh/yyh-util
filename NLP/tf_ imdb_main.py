@@ -30,10 +30,10 @@ print(data_df.head(10))
 print(data_df['label'].value_counts(normalize=True))
 
 # 特征工程(数值、类别、时间、文本、图像)
-# train_dataset, val_dataset, test_dataset = data_preprocess(data_df)
+train_dataset, val_dataset, test_dataset = data_preprocess(data_df)
 
 # 特征工程(数值、类别、时间、文本、图像)(bert)
-pretrained_model_name, from_pt = "hfl/chinese-roberta-wwm-ext", False
+# pretrained_model_name, from_pt = "hfl/chinese-roberta-wwm-ext", False
 
 # pretrained_model_name, from_pt = "prajjwal1/bert-tiny", True # (L=2, H=128)
 # pretrained_model_name, from_pt = "prajjwal1/bert-mini", True # (L=4, H=256)
@@ -46,16 +46,16 @@ pretrained_model_name, from_pt = "hfl/chinese-roberta-wwm-ext", False
 # pretrained_model_name, from_pt = "google/bert_uncased_L-8_H-512_A-8", True # (BERT-Medium)
 # pretrained_model_name, from_pt = "google/bert_uncased_L-12_H-768_A-12", True # (BERT-Base)
 
-train_dataset, val_dataset, test_dataset = data_preprocess_bert(data_df, pretrained_model_name, from_pt)
+# train_dataset, val_dataset, test_dataset = data_preprocess_bert(data_df, pretrained_model_name, from_pt)
 
 # 搭建模型
 seq_len = 100
 max_words=10000
-# model = FastText(maxlen=seq_len,
-#                 max_features=max_words,
-#                 embedding_dims=100,
-#                 class_num=2,
-#                 last_activation='softmax')
+model = FastText(maxlen=seq_len,
+                max_features=max_words,
+                embedding_dims=100,
+                class_num=2,
+                last_activation='softmax')
 
 # model = TextCNN(maxlen=seq_len,
 #                 max_features=max_words,
@@ -88,17 +88,17 @@ max_words=10000
 #                     last_activation='softmax'
 #                     )
 
-model = bert_model(pretrained_model_name=pretrained_model_name,
-                    seq_len=seq_len, 
-                    class_num=2, 
-                    from_pt=from_pt,
-                    last_activation='softmax'
-                    )
+# model = bert_model(pretrained_model_name=pretrained_model_name,
+#                     seq_len=seq_len, 
+#                     class_num=2, 
+#                     from_pt=from_pt,
+#                     last_activation='softmax'
+#                     )
 
 # # 查看模型结构
 # model.build(input_shape=(None, seq_len))
 # model.summary()
-# tf.keras.utils.plot_model(model.build_graph(seq_len), "deepLearning/tf/NLP/fasttext.png",
+# tf.keras.utils.plot_model(model.build_graph(seq_len), "NLP/fasttext.png",
 #                         show_shapes=True)
 
 model.compile(optimizer = tf.keras.optimizers.Adam(learning_rate=1e-3), 
