@@ -6,9 +6,9 @@ import optuna
 import sklearn.datasets
 import sklearn.metrics
 from sklearn.model_selection import train_test_split, KFold
-from xgboost import XGBClassifier
+# from xgboost import XGBClassifier
+from xgboost.sklearn import XGBClassifier
 import pickle
-
 
 # 导入数据（鸢尾花分类）
 iris = sklearn.datasets.load_iris()
@@ -23,17 +23,18 @@ print(df.isna().any()) # 查看是否有缺失值
 print(df.duplicated().sum()) # 统计重复的样本个数
 df.drop_duplicates(inplace = True) # 重复样本删除
 
-sns.barplot(x=df["label"].value_counts().index, 
-            y=df["label"].value_counts().values, 
-            palette ='coolwarm') # 检查标签的平衡性
-plt.title('label')
-plt.show()
+# sns.barplot(x=df["label"].value_counts().index, 
+#             y=df["label"].value_counts().values, 
+#             palette ='coolwarm') # 检查标签的平衡性
+# plt.title('label')
+# plt.show()
 
 # 特征工程（包括训练集和测试集）
 
 # 划分训练集和测试集, random_state是随机数的种子，不填则每次都不同
 feature, label = df.drop('label', axis=1), df['label']
 X_train, X_test, y_train, y_test = train_test_split(feature, label, test_size=0.2, random_state=1, shuffle=True, stratify=label)
+
 
 # 寻找超参数试验
 def objective_cv(trial):
@@ -67,14 +68,14 @@ def objective(trial, train_x, valid_x, train_y, valid_y, numRounds=100):
         "objective": trial.suggest_categorical('objective', objective_list),
         "eval_metric": trial.suggest_categorical("eval_metric", metrics_list),
         "booster": trial.suggest_categorical("booster", boosting_list),
-        "alpha": trial.suggest_float("alpha", 1e-8, 1.0, log=True),
-        "lambda": trial.suggest_float("lambda", 1e-8, 1.0, log=True),
+        "reg_alpha": trial.suggest_float("reg_alpha", 1e-8, 1.0, log=True),
+        "reg_lambda": trial.suggest_float("reg_lambda", 1e-8, 1.0, log=True),
         "n_estimators": trial.suggest_int("n_estimators", 100, 500) # 总共迭代的次数，即决策树的个数
     }
     #Create params 
     if param["booster"] == "gbtree" or param["booster"] == "dart":
         param["max_depth"] = trial.suggest_int("max_depth", 1, 9)
-        param["eta"] = trial.suggest_float("eta", 1e-8, 1.0, log=True)
+        param["learning_rate"] = trial.suggest_float("learning_rate", 1e-8, 1.0, log=True)
         param["gamma"] = trial.suggest_float("gamma", 1e-8, 1.0, log=True)
         param["grow_policy"] = trial.suggest_categorical("grow_policy", ["depthwise", "lossguide"])
     elif param["booster"] == "gblinear":
