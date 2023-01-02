@@ -4,7 +4,8 @@ Author: yangyahe
 LastEditors: yangyahe
 Date: 2022-08-23 16:52:53
 LastEditTime: 2022-08-23 18:04:56
-Description: flask服务, 输入文章id或id列表, 从Redis中读取并返回对应的文章向量, 向量由召回模型训练所得
+Description: dpp多样性核心代码, 包括核矩阵的构造和滑动窗口式dpp计算, 使用pytorch进行矩阵运算
+向量d维, 物品k个, 需要d>=k
 '''
 import numpy as np
 import torch
@@ -19,14 +20,15 @@ device=torch.device("mps") # mac m1 gpu: mps
 
 def dpp_sw(ids, kernel_matrix, window_size, epsilon=1E-10):
     """
-    Sliding window version of the greedy algorithm
-    :param kernel_matrix: 2-d array
-    :param window_size: positive int
-    :param max_length: positive int
-    :param epsilon: small positive scalar
-    :return: list
+    求解dpp的贪心算法的滑动窗口版
+    Args:
+        ids: 需要打散的文章id list
+        kernel_matrix: 2d-np.array, 核矩阵
+        window_size: 正整数, 滑动窗口的大小
+        epsilon: 一个极小的正数, 终止条件是直到最大边际收益为负时终止
+    Returns:
+        打散后的文章id列表
     """
-    kernel_matrix = kernel_matrix
     item_size = kernel_matrix.shape[0]
     max_length = item_size
     
@@ -38,7 +40,7 @@ def dpp_sw(ids, kernel_matrix, window_size, epsilon=1E-10):
     selected_items.append(ids[selected_item])
     window_left_index = 0
     while len(selected_items) < max_length:
-        k = len(selected_items) #- 1
+        k = len(selected_items) - 1
         ci_optimal = cis[window_left_index:k, selected_item]
         di_optimal = torch.sqrt(di2s[selected_item])
         v[k, window_left_index:k] = ci_optimal
@@ -100,7 +102,7 @@ if __name__ == "__main__":
     scores = np.random.rand(item_size)*3 # 排序分
     scores = scores.tolist()
     scores.sort(reverse=True)
-    ids = scores
+    ids = [x for x in range(len(scores))]
     
     feature_vectors = np.random.randn(item_size, feature_dimension)
     # feature_vectors = np.array([[1.1, 2.1, 3.2], [4.1, 7.1, 9.1], [4.1, 7.2, 9.2]])

@@ -93,12 +93,12 @@ if __name__ == "__main__":
     item_size = 60
     feature_dimension = 128
     window_size = 5
+    np.random.seed(0)
 
-    scores = np.random.rand(60)*3 # 排序分
+    scores = np.random.rand(item_size)*3 # 排序分
     scores = scores.tolist()
     scores.sort(reverse=True)
-    # scores = [3,2,1]
-    ids = scores
+    ids = [x for x in range(len(scores))]
     
     feature_vectors = np.random.randn(item_size, feature_dimension)
     item_vecs_list = feature_vectors.tolist()
