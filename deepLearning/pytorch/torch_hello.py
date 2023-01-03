@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split # 自动随机切分训练数据和测试数据
 import torch
+from torch.utils.data import Dataset
 
 
 # pytorch的基本信息
@@ -110,7 +111,7 @@ optimizer = torch.optim.SGD(model.parameters(), lr=0.01) # # 优化器对象创�
 
 # 训练模型
 num_epochs = 100
-for epoch in range(100):
+for epoch in range(num_epochs):
     train_x = torch.tensor(train_x) # 不共享内存
     train_y = torch.tensor(train_y)
     # train_x = torch.from_numpy(train_x) # 共享内存
@@ -131,11 +132,39 @@ for epoch in range(100):
 print("Weight=",model.linear.weight.item())
 print("Bias=",model.linear.bias.item())
 
-# Plot the graph
-predicted = model(torch.tensor(train_x)).detach().numpy()
-plt.plot(train_x, train_y, 'ro', label='Original data')
-plt.plot(train_x, predicted, label='Fitted line')
-plt.legend()
-plt.show()
+# # Plot the graph
+# predicted = model(torch.tensor(train_x)).detach().numpy()
+# plt.plot(train_x, train_y, 'ro', label='Original data')
+# plt.plot(train_x, predicted, label='Fitted line')
+# plt.legend()
+# plt.show()
 
 # torch.save(model.state_dict(), 'model.ckpt')
+
+import torch.onnx 
+
+#Function to Convert to ONNX 
+def Convert_ONNX(): 
+
+    # set the model to inference mode 
+    model.eval() 
+
+    # Let's create a dummy input tensor  
+    input_size = 1
+    dummy_input = torch.randn(1, input_size, requires_grad=True)  
+
+    # Export the model   
+    torch.onnx.export(model,         # model being run 
+         dummy_input,       # model input (or a tuple for multiple inputs) 
+         "HelloPytorch.onnx",       # where to save the model  
+         export_params=True,  # store the trained parameter weights inside the model file 
+         opset_version=10,    # the ONNX version to export the model to 
+         do_constant_folding=True,  # whether to execute constant folding for optimization 
+         input_names = ['modelInput'],   # the model's input names 
+         output_names = ['modelOutput'], # the model's output names 
+         dynamic_axes={'modelInput' : {0 : 'batch_size'},    # variable length axes 
+                                'modelOutput' : {0 : 'batch_size'}}) 
+    print(" ") 
+    print('Model has been converted to ONNX')
+
+Convert_ONNX()
