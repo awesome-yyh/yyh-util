@@ -1,47 +1,141 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split # 自动随机切分训练数据和测试数据
 import torch
 
 
 # pytorch的基本信息
 print("------pytorch的基本信息-------")
 print("pytorch version: ", torch.__version__)
-# mac gpu 测试:
-print(torch.backends.mps.is_available()) 
-print(torch.backends.mps.is_built())
-
 # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-device=torch.device("mps") # mac m1 gpu: mps
+device = torch.device("mps" if torch.backends.mps.is_available() else 'cpu') # mac m1 gpu: mps
 print("CPU or GPU: ", device)
 
-print("# 创建数据")
-x = torch.arange(12)
-print(x)
-print(x.shape)
-x = x.reshape(3,4)
-print(x)
-print(x.shape)
-print(torch.zeros((2,3,4)))
-print(torch.ones((2,3,4)))
-print(torch.tensor([[[1,2,3],[3,4,5]]]).shape)
 
-print("# numpy数据转换")
-n = x.numpy()
-t = torch.tensor(n)
-print(type(n), type(t))
+# 创建数据"
+print("------创建数据-------")
+print(type(torch.tensor([[[1,2,3],[3,4,5]]])))
+print(torch.ones((2,3,4)).shape)
+print(torch.zeros((2,3,4)).numpy())
+print(torch.arange(12).reshape(3,4))
 
-print("# 元素访问和修改")
-print(x[-1], x[1:3], x[1,2].item())
-x[1,2] = 99 # 原地操作（在原内存地址修改并生效）
-print(x)
+print(torch.ones((3, 2, 1), device='mps')) # 直接在gpu上创建(比在CPU创建后移动到 GPU 上快很多)
+print(torch.ones((3, 2, 1)).to('mps'))
 
-print("# 算术运算")
-x = torch.tensor([1.0,2,4])
-y = torch.tensor([3,5,7])
-print(x+y, x-y, x*y, x/y, x**y, torch.exp(x)) # 按元素进行,形状不同也可操作（广播机制）
 
-print("# 统计运算")
-print(x.sum())
+# 四则运算
+print("------四则运算-------")
+A = torch.tensor([[1.0, 2.0], 
+                 [3.0, 4.0]])
+B = torch.tensor([[5.0, 6.0], 
+                 [7.0, 8.0]])
 
-print("# 张量拼接")
-print(torch.cat((x.reshape(1,3),y.reshape(1,3)), dim=0)) # 在第0维上合并，纵向拼接
-print(torch.cat((x.reshape(1,3),y.reshape(1,3)), dim=1)) # 在第1维上合并，横向拼接
+print(torch.add(A, B)) # [[6,8],[10,12]] 对应位相加
+print(A+B) # 同上, [[6,8],[10,12]] 对应位相加
 
+print(torch.matmul(A, B)) # [[19,22],[43,50]] 矩阵乘法，对应位相乘并相加
+print(A @ B) # 同上，[[19,22],[43,50]] 矩阵乘法，对应位相乘并相加
+
+print(A * B) # [[5,12],[21,32]] 对应位置相乘
+
+
+# 元素访问和修改
+print("------元素访问和修改-------")
+T = torch.tensor([[1.0, 2.0], 
+                 [3.0, 4.0]])
+print(T[-1], T[0:1], T[0,1].item())
+T[0,1] = 99 # 原地操作（在原内存地址修改并生效）
+print(T)
+
+
+# 统计运算
+print("------统计运算-------")
+print(torch.max(A)) # 4, 最大值
+print(torch.argmax(A)) # 3, 最大值的索引
+print(torch.mean(A)) # 2.5 所有元素的平均值
+print(torch.mean(A, axis=1)) # [1.5 3.5]
+
+
+# 求导
+print("------求导-------")
+x = torch.tensor([3.0], requires_grad=True)
+y = x ** 2
+y.backward() #反向传播,求解导数
+print("x.grad = ", x.grad) # 6
+
+
+# 模型演示-线性回归
+print("------模型演示-线性回归-------")
+torch.set_default_tensor_type(torch.DoubleTensor)
+# 读取数据
+# y = 2*x - 1
+xs = np.array([-1.0,  0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0], dtype=float)
+ys = np.array([-3.0, -1.0, 1.0, 3.0, 5.0, 7.0, 9.0, 11.0], dtype=float)
+xs = xs.reshape(xs.shape[0], 1)
+ys = ys.reshape(ys.shape[0], 1)
+
+# 探索分析
+# plt.plot(xs, ys, 'ro', label='Original data')
+# plt.show()
+
+# 数据清洗(缺失值、重复值、异常值、大小写、标点)
+
+# 数据采样(搜集、合成、过采样、欠采样、阈值移动、loss加权、评价指标)
+
+# 特征工程(数值、类别、时间、文本、图像)
+
+# 划分训练集和测试集, random_state是随机数的种子，不填则每次都不同
+train_x, test_x, train_y, test_y = train_test_split(xs, ys, test_size=0.2, random_state=1)
+print(train_x, test_x, train_y, test_y)
+
+
+# 搭建模型
+class Linear(torch.nn.Module):
+    def __init__(self):
+        super(Linear, self).__init__()
+        self.linear = torch.nn.Linear(1,1) # 包括两个参数是weight和bias
+        
+    def forward(self,x): # 直接调用对象时, 会自动将传入的参数传到forward函数当中进行计算
+        y_pred = self.linear(x)
+        return y_pred
+
+model = Linear()
+
+# 查看模型结构
+print(model)
+print(list(model.parameters()))
+
+criterion = torch.nn.MSELoss(reduction='mean') # loss
+optimizer = torch.optim.SGD(model.parameters(), lr=0.01) # # 优化器对象创建时需要传入参数，这里的参数取得是模型对象当中的w和bias
+
+# 训练模型
+num_epochs = 100
+for epoch in range(100):
+    train_x = torch.tensor(train_x) # 不共享内存
+    train_y = torch.tensor(train_y)
+    # train_x = torch.from_numpy(train_x) # 共享内存
+    # train_y = torch.from_numpy(train_y)
+    
+    y_pred = model(train_x) # 前馈得到估计值
+    loss = criterion(y_pred, train_y) # 计算损失
+    
+    optimizer.zero_grad() # 先进行梯度归零
+    loss.backward() # 进行反向传播
+    optimizer.step() # 进行权重更新
+    
+    if (epoch+1) % 5 == 0:
+        print ('Epoch [{}/{}], Loss: {:.4f}'.format(epoch+1, num_epochs, loss.item()))
+
+
+# 经过100次迭代之后输出权重和偏置
+print("Weight=",model.linear.weight.item())
+print("Bias=",model.linear.bias.item())
+
+# Plot the graph
+predicted = model(torch.tensor(train_x)).detach().numpy()
+plt.plot(train_x, train_y, 'ro', label='Original data')
+plt.plot(train_x, predicted, label='Fitted line')
+plt.legend()
+plt.show()
+
+# torch.save(model.state_dict(), 'model.ckpt')

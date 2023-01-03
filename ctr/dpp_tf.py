@@ -118,6 +118,7 @@ if __name__ == "__main__":
     
     t1 = time.time()
     kernel_matrix = build_kernel_matrix(scores, item_vecs_list)
+    # print(f"build_kernel_matrix time: {(time.time() - t1)*1000} ms")
     dpp_ids = dpp_sw(ids, kernel_matrix, window_size)
     print(f"dpp_sw: {dpp_ids}")
     print(f"run dpp_sw time: {(time.time() - t1)*1000} ms, len: {len(dpp_ids)}")

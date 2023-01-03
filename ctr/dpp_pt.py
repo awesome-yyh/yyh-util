@@ -32,8 +32,8 @@ def dpp_sw(ids, kernel_matrix, window_size, epsilon=1E-10):
     item_size = kernel_matrix.shape[0]
     max_length = item_size
     
-    v=torch.zeros([max_length,max_length],dtype=torch.float32).to(device)
-    cis=torch.zeros([max_length,item_size],dtype=torch.float32).to(device)
+    v=torch.zeros([max_length,max_length],dtype=torch.float32, device=device)
+    cis=torch.zeros([max_length,item_size],dtype=torch.float32, device=device)
     di2s = torch.diag(kernel_matrix)
     selected_items = list()
     selected_item = torch.argmax(di2s)
@@ -79,8 +79,8 @@ def build_kernel_matrix(scores, feature_vectors, theta = 0.7):
     # theta越大相关性越重要，theta越小多样性越重要
     
     item_size = len(scores)
-    scores = torch.tensor(scores, dtype=torch.float32).to(device)
-    feature_vectors = torch.tensor(feature_vectors, dtype=torch.float32).to(device)
+    scores = torch.tensor(scores, dtype=torch.float32, device=device)
+    feature_vectors = torch.tensor(feature_vectors, dtype=torch.float32, device=device)
     
     feature_vectors = F.normalize(feature_vectors, p=2, dim=1) # dim=1按行处理, l2范数归一化再点乘 = 余弦相似度
     similarities = torch.matmul(feature_vectors, feature_vectors.T) # 对角线上的元素是scores的平方
@@ -111,6 +111,7 @@ if __name__ == "__main__":
     t1 = time.time()
     kernel_matrix = build_kernel_matrix(scores, item_vecs_list)
     # print(kernel_matrix)
+    print(f"build_kernel_matrix time: {(time.time() - t1)*1000} ms")
     dpp_ids = dpp_sw(ids, kernel_matrix, window_size)
     print(f"dpp_sw: {dpp_ids}")
     print(f"run dpp_sw time: {(time.time() - t1)*1000} ms, len: {len(dpp_ids)}")

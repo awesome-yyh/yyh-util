@@ -26,9 +26,9 @@ os.environ['CUDA_VISIBLE_DEVICES']='2'
 
 # 四则运算
 print("------四则运算-------")
-A = tf.constant([[1.0, 2.0], 
+A = tf.Variable([[1.0, 2.0], 
                  [3.0, 4.0]])
-B = tf.constant([[5.0, 6.0], 
+B = tf.Variable([[5.0, 6.0], 
                  [7.0, 8.0]])
 print(tf.add(A, 1)) # [[2,3],[4,5]] 所有元素+1
 print(tf.add(A, B)) # [[6,8],[10,12]] 对应位相加
@@ -39,11 +39,22 @@ print(A @ B) # 同上, [[19,22],[43,50]] 矩阵乘法，对应位相乘并相加
 print(tf.multiply(A, B)) # [[5,12],[21,32]] 对应位置相乘
 print(A * B) # 同上, [[5,12],[21,32]] 对应位置相乘
 
+
 # 查看矩阵A的形状、类型和值
 print("------形状、类型和值-------")
-print(A.shape, A.dtype, A.ndim, tf.size(A).numpy(), A.numpy()) # (2, 2) <dtype: 'float32'> 2 4(2*2) [[1. 2.]
+print(A.shape, A.dtype, tf.size(A).numpy(), A.numpy()) # (2, 2) <dtype: 'float32'> 2 4(2*2) [[1. 2.]
 print(tf.reshape(A, [1, 1, -1])) # [[[1. 2. 3. 4.]]], shape=(1, 1, 4)
 print(tf.reshape(A, [-1])) # [1. 2. 3. 4.] 展平张量
+
+
+# 元素访问和修改
+print("------元素访问和修改-------")
+T = tf.Variable([[1.0, 2.0], 
+                 [3.0, 4.0]])
+print(T[-1], T[0:1])
+T[0,1].assign(99) # 原地操作（在原内存地址修改并生效）
+print(T)
+
 
 # 统计运算
 print("------统计运算-------")
