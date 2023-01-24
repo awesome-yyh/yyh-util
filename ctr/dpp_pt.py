@@ -17,6 +17,7 @@ import logging
 
 # device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu") # linux
 device=torch.device("mps") # mac m1 gpu: mps
+# device=torch.device("cpu")
 
 def dpp_sw(ids, kernel_matrix, window_size, epsilon=1E-10):
     """
@@ -109,6 +110,7 @@ if __name__ == "__main__":
     item_vecs_list = feature_vectors.tolist()
     
     t1 = time.time()
+    print(device)
     kernel_matrix = build_kernel_matrix(scores, item_vecs_list)
     # print(kernel_matrix)
     print(f"build_kernel_matrix time: {(time.time() - t1)*1000} ms")

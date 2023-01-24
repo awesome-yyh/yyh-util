@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from torch import optim
 import torchvision as tv
-import torchvision.transforms as transforms
+from torchvision.transforms import ToTensor
 import argparse
 from pt_LeNet import LeNet_5
 
@@ -19,37 +19,38 @@ EPOCH = 5   #遍历数据集次数
 BATCH_SIZE = 64      #批处理尺寸(batch_size)
 LR = 0.001        #学习率
 
-# 定义数据预处理方式
-transform = transforms.ToTensor()
 
-# 定义训练数据集
+# 下载训练集
 trainset = tv.datasets.MNIST(
     root='./data/',
     train=True,
     download=True,
-    transform=transform)
+    transform=ToTensor()) # transform修改样本，target_transform修改label
 
+# 下载测试集
+testset = tv.datasets.MNIST(
+    root='./data/',
+    train=False,
+    download=True,
+    transform=ToTensor())
 
-# 定义训练批处理数据
+# 使用DataLoader迭代Dataset
 trainloader = torch.utils.data.DataLoader(
     trainset,
     batch_size=BATCH_SIZE,
     shuffle=True,
     )
 
-# 定义测试数据集
-testset = tv.datasets.MNIST(
-    root='./data/',
-    train=False,
-    download=True,
-    transform=transform)
-
-# 定义测试批处理数据
 testloader = torch.utils.data.DataLoader(
     testset,
     batch_size=BATCH_SIZE,
     shuffle=False,
     )
+
+for X, y in trainloader:
+    print(f"Shape of X [N, C, H, W]: {X.shape}")
+    print(f"Shape of y: {y.shape} {y.dtype}")
+    break
 
 # 定义损失函数loss function 和优化方式（采用SGD）
 net = LeNet_5().to(device)

@@ -109,8 +109,8 @@ class CustomAtt(tf.keras.layers.Layer):
         super().__init__()
     def call(self, query, key_list):
         scores = tf.matmul(query, key_list, transpose_b=True)
-        # dk = tf.cast(tf.shape(key_list)[-1], dtype=tf.float32)
-        # scores /= tf.math.sqrt(dk)
+        dk = tf.cast(tf.shape(key_list)[-1], dtype=tf.float32)
+        scores /= tf.math.sqrt(dk)
         distribution = tf.nn.softmax(scores)
         return tf.matmul(distribution, key_list)
     def get_config(self):

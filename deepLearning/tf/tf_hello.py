@@ -92,13 +92,14 @@ f = F()
 print(f())
 
 # 模型演示-线性回归
+# 即不加激活函数的全连接层
 print("------模型演示-线性回归-------")
 # 读取数据
 # y = 2*x - 1
-xs = np.array([-1.0,  0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0], dtype=float)
-ys = np.array([-3.0, -1.0, 1.0, 3.0, 5.0, 7.0, 9.0, 11.0], dtype=float)
+xs = np.array([i for i in range(10)], dtype=np.float32)
+ys = np.array([2*i-1+np.random.rand(1) for i in xs], dtype=np.float32)
 
-# 探索分析
+# # 探索分析
 # plt.plot(xs, ys, 'ro', label='Original data')
 # plt.show()
 
@@ -110,15 +111,15 @@ ys = np.array([-3.0, -1.0, 1.0, 3.0, 5.0, 7.0, 9.0, 11.0], dtype=float)
 
 # 划分训练集和测试集, random_state是随机数的种子，不填则每次都不同
 train_x, test_x, train_y, test_y = train_test_split(xs, ys, test_size=0.2, random_state=1)
-print(train_x, test_x, train_y, test_y)
+# print(train_x, test_x, train_y, test_y)
 
 # 搭建模型
 # 子类式API
 class Linear(tf.keras.Model):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.w = tf.Variable(0.0)
-        self.b = tf.Variable(0.0)
+        self.w = tf.Variable(0.1)
+        self.b = tf.Variable(0.1)
     def call(self, x):
         return self.w * x + self.b
     def build_graph(self, input_shape):
@@ -142,7 +143,7 @@ model.compile(loss='mse', optimizer='sgd', metrics=['mae'])
 # 训练模型
 early_stop=tf.keras.callbacks.EarlyStopping(monitor='loss',
                                             patience=20) # 每20步检查一下是否提升
-history = model.fit(train_x, train_y, epochs=10, callbacks=[early_stop], verbose=0)
+history = model.fit(train_x, train_y, epochs=10, callbacks=[early_stop], verbose=2)
 
 # 模型评估和改进
 test_loss, test_acc = model.evaluate(test_x, test_y, verbose=2)
