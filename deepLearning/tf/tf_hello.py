@@ -114,24 +114,27 @@ train_x, test_x, train_y, test_y = train_test_split(xs, ys, test_size=0.2, rando
 # print(train_x, test_x, train_y, test_y)
 
 # 搭建模型
-# 子类式API
-class Linear(tf.keras.Model):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.w = tf.Variable(0.1)
-        self.b = tf.Variable(0.1)
-    def call(self, x):
-        return self.w * x + self.b
-    def build_graph(self, input_shape):
-        input_ = tf.keras.layers.Input(shape=input_shape)
-        return tf.keras.models.Model(inputs=[input_], outputs=self.call(input_))
+# seq模式
+model = tf.keras.models.Sequential()
+model.add(tf.keras.layers.Dense(input_shape=(1, ), units=1, activation=None))
 
+# # 函数式API
+# x = tf.keras.Input(shape=(1,))
+# y = tf.keras.layers.Dense(units=1, activation=None)(x)
+# model = tf.keras.Model(inputs=x, outputs=y)
+
+# # 子类式API
+# class Linear(tf.keras.Model):
+#     def __init__(self, **kwargs):
+#         super().__init__(**kwargs)
+#         self.w = tf.Variable(0.1)
+#         self.b = tf.Variable(0.1)
+#     def call(self, x):
+#         return self.w * x + self.b
+#     def build_graph(self, input_shape):
+#         input_ = tf.keras.layers.Input(shape=input_shape)
+#         return tf.keras.models.Model(inputs=[input_], outputs=self.call(input_))
 # model = Linear()
-
-# 函数式API
-x = tf.keras.Input(shape=(1,))
-y = tf.keras.layers.Dense(units=1, activation=None)(x)
-model = tf.keras.Model(inputs=x, outputs=y)
 
 # 查看模型结构
 model.build((None,))

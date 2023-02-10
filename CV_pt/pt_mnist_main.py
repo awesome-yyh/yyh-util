@@ -52,9 +52,16 @@ for X, y in trainloader:
     print(f"Shape of y: {y.shape} {y.dtype}")
     break
 
-# 定义损失函数loss function 和优化方式（采用SGD）
-net = LeNet_5().to(device)
-print(net)
+
+# net = LeNet_5().to(device)
+# print(net)
+
+net = tv.models.resnet18(pretrained=True) # 使用预训练模型权重
+for param in net.parameters(): # 只调整模型的顶层
+    param.requires_grad = False
+net.fc = nn.Linear(net.fc.in_features, 10) # 取代顶层
+
+
 criterion = nn.CrossEntropyLoss()  # 交叉熵损失函数
 optimizer = optim.SGD(net.parameters(), lr=LR, momentum=0.9)
 
@@ -72,6 +79,7 @@ for epoch in range(EPOCH):
         # forward + backward
         outputs = net(inputs)
         loss = criterion(outputs, labels)
+        
         loss.backward()
         optimizer.step()
 
