@@ -76,8 +76,10 @@ if __name__ == "__main__":
     # print(train_x, test_x, train_y, test_y)
 
     train_data = Data.DataLoader(dataset=MyDataset(train_x, train_y),
-                                    batch_size=batch_size, shuffle=True, num_workers=1)
-
+                                    batch_size=batch_size, shuffle=True, num_workers=1) # num_workers: 读取数据的进程数
+    # 模式数据格式: [(data1, label1), (data2, label2), (data3, label3), ......]
+    # 如果需要别的格式, 需要在DataLoader中设置collate_fn
+    
     lr_model = LinearRegression().to(device)
     optimizer = optim.SGD(lr_model.parameters(), lr=1e-3, weight_decay=1e-2) # 优化器对象创建时需要传入参数，这里的参数取得是模型对象当中的w和bias
     loss_fn = nn.MSELoss()
