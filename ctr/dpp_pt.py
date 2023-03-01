@@ -7,6 +7,7 @@ LastEditTime: 2022-08-23 18:04:56
 Description: dpp多样性核心代码, 包括核矩阵的构造和滑动窗口式dpp计算, 使用pytorch进行矩阵运算
 向量d维, 物品k个, 需要d>=k
 '''
+import os
 import numpy as np
 import torch
 import torch.nn.functional as F
@@ -15,9 +16,13 @@ import requests,json
 import logging
 
 
-# device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu") # linux
-device=torch.device("mps") # mac m1 gpu: mps
-# device=torch.device("cpu")
+os.environ["CUDA_VISIBLE_DEVICES"] = '2'
+
+device = "cuda" if torch.cuda.is_available() else "cpu"
+if torch.backends.mps.is_available() and torch.backends.mps.is_built():
+    device = "mps"
+print("CPU or GPU: ", device)
+
 
 def dpp_sw(ids, kernel_matrix, window_size, epsilon=1E-10):
     """
@@ -33,8 +38,8 @@ def dpp_sw(ids, kernel_matrix, window_size, epsilon=1E-10):
     item_size = kernel_matrix.shape[0]
     max_length = item_size
     
-    v=torch.zeros([max_length,max_length],dtype=torch.float32, device=device)
-    cis=torch.zeros([max_length,item_size],dtype=torch.float32, device=device)
+    v = torch.zeros([max_length, max_length], dtype=torch.float32, device=device)
+    cis = torch.zeros([max_length, item_size], dtype=torch.float32, device=device)
     di2s = torch.diag(kernel_matrix)
     selected_items = list()
     selected_item = torch.argmax(di2s)
@@ -73,7 +78,8 @@ def dpp_sw(ids, kernel_matrix, window_size, epsilon=1E-10):
         selected_items.append(ids[selected_item])
     return selected_items
 
-def build_kernel_matrix(scores, feature_vectors, theta = 0.7):
+
+def build_kernel_matrix(scores, feature_vectors, theta=0.7):
     # scores: list, 排序分
     # feature_vectors: 2d-list, 特征向量
     # return: kernel_matrix: 2d-np.array 核矩阵
@@ -83,16 +89,17 @@ def build_kernel_matrix(scores, feature_vectors, theta = 0.7):
     scores = torch.tensor(scores, dtype=torch.float32, device=device)
     feature_vectors = torch.tensor(feature_vectors, dtype=torch.float32, device=device)
     
-    feature_vectors = F.normalize(feature_vectors, p=2, dim=1) # dim=1按行处理, l2范数归一化再点乘 = 余弦相似度
-    similarities = torch.matmul(feature_vectors, feature_vectors.T) # 对角线上的元素是scores的平方
+    feature_vectors = F.normalize(feature_vectors, p=2, dim=1)  # dim=1按行处理, l2范数归一化再点乘 = 余弦相似度
+    similarities = torch.matmul(feature_vectors, feature_vectors.T)  # 对角线上的元素是scores的平方
     
-    alpha = theta / (2.0 * (1-theta)) # 相关性和多样性的trade off
+    alpha = theta / (2.0 * (1 - theta))  # 相关性和多样性的trade off
     scores = torch.exp(alpha * scores)
     
-    similarities = (1 + similarities) / 2 # 需要保证任意两个商品的相似度在0到1之间，而inner product的范围在[-1,1]
+    similarities = (1 + similarities) / 2  # 需要保证任意两个商品的相似度在0到1之间，而inner product的范围在[-1,1]
     
     kernel_matrix = scores.reshape((item_size, 1)) * similarities * scores.reshape((1, item_size))
     return kernel_matrix
+
 
 if __name__ == "__main__":
     item_size = 60
@@ -100,7 +107,7 @@ if __name__ == "__main__":
     window_size = 5
     np.random.seed(0)
     
-    scores = np.random.rand(item_size)*3 # 排序分
+    scores = np.random.rand(item_size) * 3  # 排序分
     scores = scores.tolist()
     scores.sort(reverse=True)
     ids = [x for x in range(len(scores))]

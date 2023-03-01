@@ -13,6 +13,7 @@ text_tokens = tokenizer(texts, padding=True, return_tensors='pt').to(device)
 with torch.no_grad():
     outputs = model(**text_tokens)
 
+
 def get_errors(corrected_text, origin_text):
     sub_details = []
     for i, ori_char in enumerate(origin_text):
@@ -31,6 +32,7 @@ def get_errors(corrected_text, origin_text):
     sub_details = sorted(sub_details, key=operator.itemgetter(2))
     return corrected_text, sub_details
 
+
 result = []
 for ids, (i, text) in zip(outputs.logits, enumerate(texts)):
     _text = tokenizer.decode((torch.argmax(ids, dim=-1) * text_tokens.attention_mask[i]),
@@ -38,4 +40,4 @@ for ids, (i, text) in zip(outputs.logits, enumerate(texts)):
     corrected_text, details = get_errors(_text, text)
     # print(text, ' => ', corrected_text, details)
     result.append((corrected_text, details))
-print(result) # [('这是一个文本纠错的案例', [('时', '是', 1, 2), ('亿', '一', 2, 3), ('安', '案', 9, 10)])]
+print(result)  # [('这是一个文本纠错的案例', [('时', '是', 1, 2), ('亿', '一', 2, 3), ('安', '案', 9, 10)])]
