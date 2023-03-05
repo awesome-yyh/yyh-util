@@ -1,8 +1,7 @@
-# -*- coding:utf-8 -*-
 import logging
-from logging.handlers import QueueHandler
+import logging.handlers
 import os
-import re
+
 
 class Logger:
     """自定义日志类
@@ -22,9 +21,9 @@ class Logger:
     :backupCount(int): 日志备份数
     """
     def __init__(self, filename, level='info', when='D', backCount=30):
-        dirName = os.path.dirname(filename) # 因为日志文件会自动创建，但是文件夹得有
-        if dirName != '':  # 如果给了文件夹，则创建文件夹
-            os.makedirs(dirName, exist_ok=True)  # 创建时文件夹存在则跳过
+        dir_name = os.path.dirname(filename)  # 因为日志文件会自动创建，但是文件夹得有
+        if dir_name != '':  # 如果给了文件夹，则创建文件夹
+            os.makedirs(dir_name, exist_ok=True)  # 创建时文件夹存在则跳过
 
         level_relations = {
             'debug': logging.DEBUG,
@@ -40,28 +39,27 @@ class Logger:
             # 所以如果程序中有多个同filename的logger时，日志会重复打印。故需要先判断
             self.logger.setLevel(level_relations.get(level))  # 设置日志级别
 
-            fmt='%(asctime)s - %(pathname)s[line:%(lineno)d] - %(levelname)s: %(message)s'
-            format_str = logging.Formatter(fmt)  # 格式化器，设置日志内容的组成结构和消息字段。
+            format_str = '%(asctime)s - %(pathname)s[line:%(lineno)d] - %(levelname)s: %(message)s'
+            formatter = logging.Formatter(format_str)  # 格式化器，设置日志内容的组成结构和消息字段。
 
             # Handlers用于将日志发送至目的地
             # 往屏幕上输出
-            sh = logging.StreamHandler()  
-            sh.setFormatter(format_str) 
+            sh = logging.StreamHandler()
+            sh.setFormatter(formatter)
             self.logger.addHandler(sh)
 
-             # 往文件里写入
-            th = logging.handlers.TimedRotatingFileHandler(filename=filename, interval=1, when=when, backupCount=backCount,
-                                                          encoding='utf-8')
-            th.setFormatter(format_str) 
+            # 往文件里写入
+            th = logging.handlers.TimedRotatingFileHandler(filename=filename, interval=1, when=when, backupCount=backCount, encoding='utf-8')
+            th.setFormatter(formatter)
             self.logger.addHandler(th)
 
-# 用法：
+
 if __name__ == "__main__":
-    log = Logger("log/testLog.log")
+    # 用法：
+    log = Logger("logs/testLog.log")
     log.logger.info("okkk")
     log.logger.warning("warning")
     log.logger.error("error")
-
     
-    log_error = Logger("log/testLogerr.log", level='error')
+    log_error = Logger("logs/testLogerr.log", level='error')
     log_error.logger.error("errr")

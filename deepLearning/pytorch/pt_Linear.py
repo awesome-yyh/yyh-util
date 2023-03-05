@@ -173,6 +173,7 @@ if __name__ == "__main__":
     # 默认数据格式: [(data1, label1), (data2, label2), ...]
     # 在DataLoader中设置collate_fn, 可以设置数据格式，也可以进行数据清洗(缺失值、重复值、异常值)
     # 在DataLoader中设置sampler, 可以进行数据采样(搜集、合成、过采样、欠采样、阈值移动、loss加权、评价指标)
+    # 如果训练数据集有1000个样本，并且batch_size的大小为10，则dataloader的长度就是100
     test_loader = Data.DataLoader(dataset=test_dataset, batch_size=args.batch_size, shuffle=True, num_workers=1) 
 
     lr_model = Linear(1, 1)

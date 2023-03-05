@@ -10,7 +10,7 @@ from transformers import AutoTokenizer, AutoModelForMaskedLM
 import fastseq
 
 
-def seed_everything(seed=1029):
+def seed_everything(seed=42):
     random.seed(seed)
     os.environ['PYTHONHASHSEED'] = str(seed)
     np.random.seed(seed)
@@ -45,4 +45,4 @@ top_5_tokens = torch.topk(mask_token_logits, 5, dim=1).indices[0].tolist()
 for token in top_5_tokens:
     print(f"'>>> {text.replace(tokenizer.mask_token, tokenizer.decode([token]))}'")
 
-print(time.time()-t1)
+print(time.time() - t1)

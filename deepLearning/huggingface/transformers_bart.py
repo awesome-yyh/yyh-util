@@ -9,4 +9,4 @@ model = BartSeq2SeqModel(
     tokenizer=tokenizer,
     args={"max_length": 128, "eval_batch_size": 128})
 sentences = ["这时亿个文本纠错的安例"]
-print(model.predict(sentences)) # ['这是一个文本纠错的案例']
+print(model.predict(sentences))  # ['这是一个文本纠错的案例']
