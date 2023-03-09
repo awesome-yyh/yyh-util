@@ -4,8 +4,8 @@ import torch.nn as nn
 
 q = torch.tensor([[[1, 2, 3], [3, 4, 5]], [[1, 2, 3], [3, 4, 5]]], dtype=torch.float32)
 k = torch.tensor([[[1, 2, 3], [3, 4, 5]],
-                   [[4, 5, 6], [7, 8, 9]],
-                   [[5, 4, 3], [2, 1, 0]]], dtype=torch.float32)
+                  [[4, 5, 6], [7, 8, 9]],
+                  [[5, 4, 3], [2, 1, 0]]], dtype=torch.float32)
 # v = torch.empty(k.shape, dtype=torch.float32)
 v = k
 print(q.shape, k.shape, v.shape)

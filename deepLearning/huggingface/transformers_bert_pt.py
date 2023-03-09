@@ -27,8 +27,9 @@ input1 = tokenizer(
     max_length=maxlen,  # 2个句子加起来的长度
     return_tensors='pt')  # 返回字典, input_ids, token_type_ids, attention_mask
 print("input1: ", input1)
-
-sequence_output, pooled_output, hidden_states = model(**input1)
+# input1 = {key: value.squeeze() for key, value in input1.items()}
+# print("input1: ", input1)
+sequence_output, pooled_output, hidden_states = model(**input1)  # model的输入必须以batch形式输入即input_ids等都是二维向量
 print(sequence_output.shape)
 print(pooled_output.shape)
 print(len(hidden_states), hidden_states[0].shape, hidden_states[1].shape)
