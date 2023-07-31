@@ -1,4 +1,4 @@
-import  tensorflow as tf
+import tensorflow as tf
 from tensorflow.keras.layers import Embedding, Dense, GRU, Bidirectional, GlobalAveragePooling1D
 
 
@@ -26,7 +26,7 @@ class TextRNN(tf.keras.Model):
         self.last_activation = last_activation
 
         self.embedding = Embedding(input_dim=self.max_features, output_dim=self.embedding_dims, input_length=self.maxlen)
-        self.bi_rnn = Bidirectional(layer=GRU(units=128, activation='tanh', return_sequences=True), merge_mode='concat' ) # LSTM or GRU
+        self.bi_rnn = Bidirectional(layer=GRU(units=128, activation='tanh', return_sequences=True), merge_mode='concat')  # LSTM or GRU
         self.avepool = GlobalAveragePooling1D()
         self.dense = Dense(128, activation='relu')
         self.classifier = Dense(self.class_num, activation=self.last_activation)
@@ -60,7 +60,7 @@ class TextRNN(tf.keras.Model):
         return tf.keras.models.Model(inputs=[input_], outputs=self.call(input_))
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     model = TextRNN(maxlen=400,
                     max_features=5000,
                     embedding_dims=100,

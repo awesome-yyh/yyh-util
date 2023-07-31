@@ -2,6 +2,7 @@ import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 def add_layer(inputs, in_size, out_size, activation_fun=None):
     Weight = tf.Variable(tf.random_normal([in_size, out_size], dtype=tf.float32),
                     name = "Weight") # 随机生成指定形状的浮点数，默认均值是0，方差是1

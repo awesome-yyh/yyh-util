@@ -4,6 +4,7 @@ import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
 import numpy as np
 
+
 def add_layer(inputs, in_size, out_size, activation_fun=None, layer_name="layer"):
     with tf.name_scope(layer_name):
         with tf.name_scope("weight"):

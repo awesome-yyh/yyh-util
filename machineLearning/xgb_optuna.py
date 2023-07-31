@@ -10,18 +10,19 @@ from sklearn.model_selection import train_test_split, KFold
 from xgboost.sklearn import XGBClassifier
 import pickle
 
+
 # 导入数据（鸢尾花分类）
 iris = sklearn.datasets.load_iris()
-data = iris.data # np.array
-label = iris.target # np.array
-df = pd.concat([pd.DataFrame(data), pd.DataFrame(label)], axis=1, ignore_index = False)
+data = iris.data  # np.array
+label = iris.target  # np.array
+df = pd.concat([pd.DataFrame(data), pd.DataFrame(label)], axis=1, ignore_index=False)
 
 # 数据清洗（包括训练集和测试集）
-df.columns=['x1','x2','x3','x4','label'] # 花萼长度，花萼宽度，花瓣长度，花瓣宽度，鸢尾花的类别（包括Setosa，Versicolour，Virginica三类）
-print(df.isna().any()) # 查看是否有缺失值
+df.columns = ['x1', 'x2', 'x3', 'x4', 'label']  # 花萼长度，花萼宽度，花瓣长度，花瓣宽度，鸢尾花的类别（包括Setosa，Versicolour，Virginica三类）
+print(df.isna().any())  # 查看是否有缺失值
 
-print(df.duplicated().sum()) # 统计重复的样本个数
-df.drop_duplicates(inplace = True) # 重复样本删除
+print(df.duplicated().sum())  # 统计重复的样本个数
+df.drop_duplicates(inplace=True)  # 重复样本删除
 
 # sns.barplot(x=df["label"].value_counts().index, 
 #             y=df["label"].value_counts().values, 
@@ -38,10 +39,10 @@ X_train, X_test, y_train, y_test = train_test_split(feature, label, test_size=0.
 
 # 寻找超参数试验
 def objective_cv(trial):
-    #Create data
-    kf = KFold(n_splits=4, shuffle=True, random_state=0) # 每次都用同一个随机数打乱，然后分成4分，1分验证，其余训练
+    # Create data
+    kf = KFold(n_splits=4, shuffle=True, random_state=0)  # 每次都用同一个随机数打乱，然后分成4分，1分验证，其余训练
     scores = []
-    for train_index, test_index in kf.split(X_train, y_train): # 拿到train和test的索引
+    for train_index, test_index in kf.split(X_train, y_train):  # 拿到train和test的索引
         kf_X_train, kf_X_test = X_train.iloc[train_index], X_train.iloc[test_index]
         kf_y_train, kf_y_test = y_train.iloc[train_index], y_train.iloc[test_index]
 
@@ -49,9 +50,10 @@ def objective_cv(trial):
         scores.append(metric)
     return np.mean(scores)
 
+
 def objective(trial, train_x, valid_x, train_y, valid_y, numRounds=100):
-    objective_list = ['multi:softprob', 'multi:softmax'] # 多分类的目标函数
-    metrics_list = ['merror', 'mlogloss'] # 多分类的评价函数
+    objective_list = ['multi:softprob', 'multi:softmax']  # 多分类的目标函数
+    metrics_list = ['merror', 'mlogloss']  # 多分类的评价函数
     
     # objective_list = ['reg:linear', 'reg:logistic', 'binary:logistic'] # 二分类的目标函数
     # metrics_list = ["auc", "rmse", "logloss", "error"] # 二分类的评价函数
@@ -61,18 +63,18 @@ def objective(trial, train_x, valid_x, train_y, valid_y, numRounds=100):
     
     boosting_list = ['gbtree', 'gblinear', 'dart']
     
-    #Create params 
+    # Create params
     param = {
         "verbosity": 0,
-        'num_class':3,
+        'num_class': 3,
         "objective": trial.suggest_categorical('objective', objective_list),
         "eval_metric": trial.suggest_categorical("eval_metric", metrics_list),
         "booster": trial.suggest_categorical("booster", boosting_list),
         "reg_alpha": trial.suggest_float("reg_alpha", 1e-8, 1.0, log=True),
         "reg_lambda": trial.suggest_float("reg_lambda", 1e-8, 1.0, log=True),
-        "n_estimators": trial.suggest_int("n_estimators", 100, 500) # 总共迭代的次数，即决策树的个数
+        "n_estimators": trial.suggest_int("n_estimators", 100, 500)  # 总共迭代的次数，即决策树的个数
     }
-    #Create params 
+    # Create params
     if param["booster"] == "gbtree" or param["booster"] == "dart":
         param["max_depth"] = trial.suggest_int("max_depth", 1, 9)
         param["learning_rate"] = trial.suggest_float("learning_rate", 1e-8, 1.0, log=True)
@@ -83,21 +85,22 @@ def objective(trial, train_x, valid_x, train_y, valid_y, numRounds=100):
         param["normalize_type"] = trial.suggest_categorical("normalize_type", ["tree", "forest"])
         param["rate_drop"] = trial.suggest_float("rate_drop", 1e-8, 1.0, log=True)
         param["skip_drop"] = trial.suggest_float("skip_drop", 1e-8, 1.0, log=True)
-    #Create data type XGBoost
+    # Create data type XGBoost
     model = XGBClassifier(**param)  
-    model.fit(train_x, train_y, eval_set=[(valid_x,valid_y)], verbose=False)
+    model.fit(train_x, train_y, eval_set=[(valid_x, valid_y)], verbose=False)
     
     preds = model.predict(valid_x)
     
     accuracy = sklearn.metrics.accuracy_score(valid_y, preds)
     return accuracy
 
+
 study = optuna.create_study(direction="maximize")
 study.optimize(objective_cv, n_trials=3)
-fig =optuna.visualization.plot_param_importances(study)
+fig = optuna.visualization.plot_param_importances(study)
 fig.show()
 
-print("xgb的最佳参数: ", study.best_trial.params) # 获取最佳参数
+print("xgb的最佳参数: ", study.best_trial.params)  # 获取最佳参数
 
 # 使用最佳参数训练
 clf = XGBClassifier(**(study.best_trial.params))

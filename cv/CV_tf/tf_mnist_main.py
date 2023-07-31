@@ -1,4 +1,5 @@
-import os, datetime
+import os
+import datetime
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras.datasets import mnist
@@ -22,11 +23,11 @@ from tf_LeNet import LeNet_5
 # 类别不均衡(搜集、合成、过采样、欠采样、阈值移动、loss加权、更改评价指标)
 
 # 特征工程(数值、类别、时间、文本、图像)
-training_images=training_images.reshape(60000, 28, 28, 1)
+training_images = training_images.reshape(60000, 28, 28, 1)
 test_images = test_images.reshape(10000, 28, 28, 1)
 
-training_images=training_images / 255.0
-test_images=test_images/255.0
+training_images = training_images / 255.0
+test_images = test_images / 255.0
 
 # 划分训练集、验证集、测试集
 training_images, val_images, training_labels, val_labels = train_test_split(
@@ -52,8 +53,8 @@ model.build(input_shape=(None, 28, 28, 1))
 model.summary()
 # tf.keras.utils.plot_model(model, "CV/model.png", show_shapes=True)
 
-model.compile(optimizer = tf.keras.optimizers.Adam(learning_rate=1e-3), 
-              loss = tf.keras.losses.sparse_categorical_crossentropy, 
+model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-3), 
+              loss=tf.keras.losses.sparse_categorical_crossentropy, 
               metrics=['accuracy'])
 
 # 训练模型
@@ -61,12 +62,12 @@ model.compile(optimizer = tf.keras.optimizers.Adam(learning_rate=1e-3),
 early_stopping = tf.keras.callbacks.EarlyStopping(
     monitor='val_accuracy', 
     verbose=1,
-    patience=10, # 每10步检查一下是否提升
-    mode='max', # monitor是准确率时max，是损失时min
+    patience=10,  # 每10步检查一下是否提升
+    mode='max',  # monitor是准确率时max，是损失时min
     restore_best_weights=True)
 
 # tensorboard
-log_dir="./logs/cnn/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+log_dir = "./logs/cnn/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 tensorboard_callback = tf.keras.callbacks.TensorBoard(
     log_dir=log_dir, histogram_freq=1, write_graph=True,
     write_images=True, write_steps_per_second=False, update_freq='epoch',
@@ -88,35 +89,12 @@ ckpt_callback = tf.keras.callbacks.ModelCheckpoint(
 #     # 若成功加载前面保存的参数，输出下列信息
 #     print("checkpoint_loaded")
 
-history = model.fit(train_dataset, validation_data = val_dataset,
+history = model.fit(train_dataset, validation_data=val_dataset,
                     callbacks=[early_stopping, tensorboard_callback, ckpt_callback],
                     epochs=3, verbose=2)
 
-# # 模型评估和改进
-# # > tensorboard --logdir logs/mlp
-# import matplotlib.pyplot as plt
-# history_dict = history.history
-# loss_values = history_dict["loss"]
-# val_loss_values = history_dict["val_loss"]
-# epochs = range(1, len(loss_values) + 1)
-# plt.subplot(121)
-# plt.plot(epochs, loss_values, "bo", label="Training loss")
-# plt.plot(epochs, val_loss_values, "b", label="Validation loss")
-# plt.title("Training and validation loss")
-# plt.xlabel("Epochs")
-# plt.ylabel("Loss")
-# plt.legend()
-
-# plt.subplot(122)
-# acc = history_dict["accuracy"]
-# val_acc = history_dict["val_accuracy"]
-# plt.plot(epochs, acc, "bo", label="Training acc")
-# plt.plot(epochs, val_acc, "b", label="Validation acc")
-# plt.title("Training and validation accuracy")
-# plt.xlabel("Epochs")
-# plt.ylabel("Accuracy")
-# plt.legend()
-# plt.show()
+# 模型评估和改进
+# > tensorboard --logdir logs/mlp
 
 test_loss, test_acc = model.evaluate(test_dataset, verbose=2)
 print("=============")
@@ -137,8 +115,8 @@ pb_file_path = './models/multiModel/cnn/1'
 model.save(pb_file_path, save_format='tf')
 
 # 模型加载和预测(pb)
-restored_saved_model=tf.keras.models.load_model(pb_file_path)
-test_input = np.expand_dims(test_images[0],0)
+restored_saved_model = tf.keras.models.load_model(pb_file_path)
+test_input = np.expand_dims(test_images[0], 0)
 pred = restored_saved_model.predict(test_input)
 print(f"第一张图片的预测值: {np.argmax(pred)}, 概率: {np.max(pred)}")
 print(f"第一张图片的真实值: {test_labels[0]}")

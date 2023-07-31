@@ -7,10 +7,10 @@ class LeNet_5(keras.Model):
         super().__init__()
         self.num_classes = num_classes
         
-        self.c1 = keras.layers.Conv2D(filters=6, kernel_size=(5,5), padding='valid', activation="tanh")
-        self.s2 = keras.layers.MaxPooling2D(pool_size=(2,2))
-        self.c3 = keras.layers.Conv2D(filters=16, kernel_size=(5,5), padding='valid', activation="tanh")
-        self.s4 = keras.layers.MaxPooling2D(pool_size=(2,2))
+        self.c1 = keras.layers.Conv2D(filters=6, kernel_size=(5, 5), padding='valid', activation="tanh")
+        self.s2 = keras.layers.MaxPooling2D(pool_size=(2, 2))
+        self.c3 = keras.layers.Conv2D(filters=16, kernel_size=(5, 5), padding='valid', activation="tanh")
+        self.s4 = keras.layers.MaxPooling2D(pool_size=(2, 2))
         self.flatten = keras.layers.Flatten()
         self.f5 = keras.layers.Dense(120, activation="tanh")
         self.f6 = keras.layers.Dense(84, activation="tanh")
@@ -27,6 +27,7 @@ class LeNet_5(keras.Model):
         x = self.f7(x)
         
         return x
+    
     def build_graph(self, input_shape):
         input_ = tf.keras.layers.Input(shape=input_shape)
         return tf.keras.models.Model(inputs=[input_], outputs=self.call(input_))

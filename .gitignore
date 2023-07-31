@@ -9,6 +9,7 @@ yarn-debug.log*
 yarn-error.log*
 selenium-debug.log
 venv/
+prune-bert-base-chinese
 model/
 models/
 logs/

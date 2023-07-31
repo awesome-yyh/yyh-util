@@ -39,7 +39,7 @@ for var in tf.global_variables():
         print(var)
     else:
         need_vars.append(var)
-        print('####',var)
+        print('####', var)
 
 # 保存model
 saver = tf.train.Saver(need_vars)

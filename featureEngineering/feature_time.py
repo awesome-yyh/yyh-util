@@ -6,19 +6,19 @@ import pandas as pd
 # 时间点
 # 列表：[年 月 日 一年中的第几天 一年中的第几周 周几]
 
-#将一个字符串形式的日期转换为日期格式的日期
-car_sales.loc[:,'date'] = pd.to_datetime(car_sales['date_t'])
+# 将一个字符串形式的日期转换为日期格式的日期
+car_sales.loc[:, 'date'] = pd.to_datetime(car_sales['date_t'])
 
 # 取出几月份
-car_sales.loc[:,'month'] = car_sales['date'].dt.month
+car_sales.loc[:, 'month'] = car_sales['date'].dt.month
 #取出星期几
-car_sales.loc[:,'dow'] = car_sales['date'].dt.dayofweek
+car_sales.loc[:, 'dow'] = car_sales['date'].dt.dayofweek
 # 取出一年当中的第几天
-car_sales.loc[:,'doy'] = car_sales['date'].dt.dayofyear
+car_sales.loc[:, 'doy'] = car_sales['date'].dt.dayofyear
 # 取出来是几号
-car_sales.loc[:,'dom'] = car_sales['date'].dt.day
+car_sales.loc[:, 'dom'] = car_sales['date'].dt.day
 #判断是否是周末
-car_sales.loc[:,'is_weekend'] = car_sales['dow'].apply(lambda x: 1 if (x==0 or x==6) else 0)
+car_sales.loc[:, 'is_weekend'] = car_sales['dow'].apply(lambda x: 1 if (x == 0 or x == 6) else 0)
 
 
 # 时间段

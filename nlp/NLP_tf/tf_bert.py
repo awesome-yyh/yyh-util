@@ -12,16 +12,15 @@ def bert_encode(pretrained_model_name, data, maximum_len):
     print("正在进行bert_encode……")
     for i in tqdm(range(len(data))):
         encoded = TOKENIZER.encode_plus(data[i],
-                                        add_special_tokens=True, # Add '[CLS]' and '[SEP]'
-                                        max_length=maximum_len, # # Pad & truncate all sentences
+                                        add_special_tokens=True,  # Add '[CLS]' and '[SEP]'
+                                        max_length=maximum_len,  # # Pad & truncate all sentences
                                         padding='max_length',
                                         truncation=True,
                                         return_attention_mask=True)
 
         input_ids.append(encoded['input_ids'])
         attention_masks.append(encoded['attention_mask'])
-        token_type_ids.append(encoded['token_type_ids']) # differentiate two sentences
-
+        token_type_ids.append(encoded['token_type_ids'])  # differentiate two sentences
 
     return np.array(input_ids), np.array(attention_masks), np.array(token_type_ids)
 
@@ -52,7 +51,7 @@ def bert_model(pretrained_model_name, seq_len, class_num, from_pt=False, last_ac
     return model
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     # pretrained_model_name, from_pt = "hfl/chinese-roberta-wwm-ext", False
     pretrained_model_name, from_pt = "prajjwal1/bert-tiny", True
     data = ["今天是冬至，吃饺子"]

@@ -8,24 +8,22 @@ from pt_LeNet import LeNet_5
 
 
 device = torch.device("mps")
-#使得我们能够手动输入命令行参数，就是让风格变得和Linux命令行差不多
 parser = argparse.ArgumentParser()
-parser.add_argument('--outf', default='./models/', help='folder to output images and model checkpoints') #模型保存路径
-parser.add_argument('--net', default='./models/net.pth', help="path to netG (to continue training)")  #模型加载路径
+parser.add_argument('--outf', default='./models/', help='folder to output images and model checkpoints')  # 模型保存路径
+parser.add_argument('--net', default='./models/net.pth', help="path to netG (to continue training)")  # 模型加载路径
 opt = parser.parse_args()
 
 # 超参数设置
-EPOCH = 5   #遍历数据集次数
-BATCH_SIZE = 64      #批处理尺寸(batch_size)
-LR = 0.001        #学习率
-
+EPOCH = 5  # 遍历数据集次数
+BATCH_SIZE = 64  # 批处理尺寸(batch_size)
+LR = 0.001  # 学习率
 
 # 下载训练集
 trainset = tv.datasets.MNIST(
     root='./data/',
     train=True,
     download=True,
-    transform=ToTensor()) # transform修改样本，target_transform修改label
+    transform=ToTensor())  # transform修改样本，target_transform修改label
 
 # 下载测试集
 testset = tv.datasets.MNIST(
@@ -52,15 +50,13 @@ for X, y in trainloader:
     print(f"Shape of y: {y.shape} {y.dtype}")
     break
 
-
 # net = LeNet_5().to(device)
 # print(net)
 
-net = tv.models.resnet18(pretrained=True) # 使用预训练模型权重
-for param in net.parameters(): # 只调整模型的顶层
+net = tv.models.resnet18(pretrained=True)  # 使用预训练模型权重
+for param in net.parameters():  # 只调整模型的顶层
     param.requires_grad = False
-net.fc = nn.Linear(net.fc.in_features, 10) # 取代顶层
-
+net.fc = nn.Linear(net.fc.in_features, 10)  # 取代顶层
 
 criterion = nn.CrossEntropyLoss()  # 交叉熵损失函数
 optimizer = optim.SGD(net.parameters(), lr=LR, momentum=0.9)
@@ -86,8 +82,7 @@ for epoch in range(EPOCH):
         # 每训练100个batch打印一次平均loss
         sum_loss += loss.item()
         if i % 100 == 99:
-            print('[%d, %d] loss: %.03f'
-                    % (epoch + 1, i + 1, sum_loss / 100))
+            print(f"[{epoch+1}, {i+1}] loss: {sum_loss / 100:.3f}")
             sum_loss = 0.0
     # 每跑完一次epoch测试一下准确率
     with torch.no_grad():

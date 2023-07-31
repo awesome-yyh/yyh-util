@@ -1,6 +1,7 @@
 import tensorflow as tf
 import numpy as np
 
+
 ## line reg model
 xs = tf.placeholder(tf.float32, shape=[100,], name='x') # shape依次为输入维度、输出维度
 ys = tf.placeholder(tf.float32, shape=[100,], name='y')

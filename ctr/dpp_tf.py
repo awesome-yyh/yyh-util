@@ -4,7 +4,7 @@ Author: yangyahe
 LastEditors: yangyahe
 Date: 2022-08-23 16:52:53
 LastEditTime: 2022-08-23 18:04:56
-Description: dpp多样性核心代码, 包括核矩阵的构造和滑动窗口式dpp计算, 使用numpy进行矩阵运算
+Description: dpp多样性核心代码, 包括核矩阵的构造和滑动窗口式dpp计算, 使用tf进行矩阵运算
 向量d维, 物品k个, 需要d>=k
 '''
 import numpy as np
@@ -43,9 +43,9 @@ def dpp_sw(ids, kernel_matrix, window_size, epsilon=1E-10):
         v[k, k].assign(di_optimal)
 
         elements = kernel_matrix[selected_item, :]
-        eis = (elements - tf.matmul(tf.expand_dims(ci_optimal,0), cis[window_left_index:k, :])) / di_optimal
+        eis = (elements - tf.matmul(tf.expand_dims(ci_optimal, 0), cis[window_left_index:k, :])) / di_optimal
         
-        eis = tf.squeeze(eis,0)
+        eis = tf.squeeze(eis, 0)
         cis[k, :].assign(eis)
         di2s = di2s - tf.square(eis)
         if len(selected_items) >= window_size:
@@ -74,7 +74,8 @@ def dpp_sw(ids, kernel_matrix, window_size, epsilon=1E-10):
         selected_items.append(ids[selected_item])
     return selected_items
 
-def build_kernel_matrix(scores, feature_vectors, theta = 0.7):
+
+def build_kernel_matrix(scores, feature_vectors, theta=0.7):
     """
     构建核矩阵
     Args:
@@ -91,15 +92,16 @@ def build_kernel_matrix(scores, feature_vectors, theta = 0.7):
     
     feature_vectors = feature_vectors / tf.norm(feature_vectors, ord=2, axis=1, keepdims=True)
     
-    similarities = tf.matmul(feature_vectors, tf.transpose(feature_vectors)) # 对角线上的元素是scores的平方
+    similarities = tf.matmul(feature_vectors, tf.transpose(feature_vectors))  # 对角线上的元素是scores的平方
     
-    alpha = theta / (2.0 * (1-theta)) # 相关性和多样性的trade off
+    alpha = theta / (2.0 * (1 - theta))  # 相关性和多样性的trade off
     scores = tf.exp(alpha * scores)
     
-    similarities = (1 + similarities) / 2 # 需要保证任意两个商品的相似度在0到1之间，而inner product的范围在[-1,1]
+    similarities = (1 + similarities) / 2  # 需要保证任意两个商品的相似度在0到1之间，而inner product的范围在[-1,1]
     
     kernel_matrix = tf.reshape(scores, [item_size, 1]) * similarities * tf.reshape(scores, [1, item_size])
     return kernel_matrix
+
 
 if __name__ == "__main__":
     item_size = 60
@@ -107,7 +109,7 @@ if __name__ == "__main__":
     window_size = 5
     np.random.seed(0)
 
-    scores = np.random.rand(item_size)*3 # 排序分
+    scores = np.random.rand(item_size) * 3  # 排序分
     scores = scores.tolist()
     scores.sort(reverse=True)
     ids = [x for x in range(len(scores))]

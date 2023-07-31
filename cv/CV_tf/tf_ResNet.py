@@ -7,11 +7,8 @@ class Basic_Block(keras.Model):
     ''' basic block constructing the layers for resNet18 and resNet34
     '''
     def __init__(self, filters, block_name,
-                downsample=False, stride=1):
+                 downsample=False, stride=1):
         super().__init__()
-        conv_name = 'res' + block_name + '_branch'
-        bn_name = 'bn' + block_name + '_branch'
-
         self.downsample = downsample
 
         self.conv2a = keras.layers.Conv2D(filters=filters,

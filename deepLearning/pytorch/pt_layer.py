@@ -2,6 +2,19 @@ import torch
 import torch.nn as nn
 
 
+class Linear(nn.Module):
+    def __init__(self, in_features, out_features):
+        super(Linear, self).__init__()  # 等价于nn.Module.__init__(self)
+        self.w = nn.Parameter(torch.randn(in_features, out_features))
+        self.b = nn.Parameter(torch.randn(out_features))
+    
+    def forward(self, x):
+        x = x.mm(self.w)  # x.@(self.w)
+        return x + self.b.expand_as(x)
+
+
+
+
 q = torch.tensor([[[1, 2, 3], [3, 4, 5]], [[1, 2, 3], [3, 4, 5]]], dtype=torch.float32)
 k = torch.tensor([[[1, 2, 3], [3, 4, 5]],
                   [[4, 5, 6], [7, 8, 9]],
@@ -30,15 +43,3 @@ encoder_layer = nn.TransformerEncoderLayer(d_model=128, nhead=8, batch_first=Tru
 src = torch.rand(32, 10, 128)
 out = encoder_layer(src)
 print("TransformerEncoderLayer: ", out)
-
-
-class Linear(nn.Module):  # 继承nn.Module
-    def __init__(self, in_features, out_features):
-        super(Linear, self).__init__()  # 等价于nn.Module.__init__(self)
-        self.w = nn.Parameter(torch.randn(in_features, out_features))
-        self.b = nn.Parameter(torch.randn(out_features))
-    
-    def forward(self, x):
-        x = x.mm(self.w)  # x.@(self.w)
-        return x + self.b.expand_as(x)
-    

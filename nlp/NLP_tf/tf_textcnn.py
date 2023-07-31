@@ -1,4 +1,4 @@
-import  tensorflow as tf
+import tensorflow as tf
 from tensorflow.keras.layers import Embedding, Conv1D, Dense, Concatenate, GlobalMaxPooling1D
 
 
@@ -8,7 +8,7 @@ class TextCNN(tf.keras.Model):
                  max_features,
                  embedding_dims,
                  class_num,
-                 kernel_sizes=[1,2,3],
+                 kernel_sizes=[1, 2, 3],
                  kernel_regularizer=None,
                  last_activation='softmax'
                  ):
@@ -70,14 +70,14 @@ class TextCNN(tf.keras.Model):
         return tf.keras.models.Model(inputs=[input_], outputs=self.call(input_))
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     model = TextCNN(maxlen=400,
-                max_features=5000,
-                embedding_dims=200,
-                class_num=2,
-                kernel_sizes=[2,3,5],
-                kernel_regularizer=None,
-                last_activation='softmax')
+                    max_features=5000,
+                    embedding_dims=200,
+                    class_num=2,
+                    kernel_sizes=[2, 3, 5],
+                    kernel_regularizer=None,
+                    last_activation='softmax')
     model.build(input_shape=(None, 400))
     model.summary()
     tf.keras.utils.plot_model(model.build_graph(input_shape=400), "NLP/text_cnn.png",

@@ -54,7 +54,7 @@ class Linear(nn.Module):
         return logits
 
 
-class Trainer(object):
+class Trainer():
     def __init__(self, model, criterion, optimizer, dataloader, epochs, device, use_cuda=False, seed=42):
         self.model = model
         self.criterion = criterion
@@ -112,8 +112,8 @@ class Trainer(object):
         return sum_loss
 
     def evaluation(self):
-        self.model.eval()
-        with torch.no_grad():  # 或者@torch.no_grad() 被他们包裹的代码块不需要计算梯度， 也不需要反向传播
+        self.model.eval()  # 主要是控制batchnorm 和 dropout 层
+        with torch.no_grad():  # 或者@torch.no_grad() 被他们包裹的代码块不需要计算梯度， 也不需要反向传播, 能节省显存和加速
             eval_loss = 0
             eval_acc = 0
             for i, batch in enumerate(self.dataloader):
@@ -179,6 +179,7 @@ if __name__ == "__main__":
     lr_model = Linear(1, 1)
     print("查看模型结构: ")
     print(lr_model)
+    print("Total Parameters:", sum([p.nelement() for p in lr_model.parameters()]))
     print("模型的可训练参数: ")
     for name, parameters in lr_model.named_parameters():
         print(name, ':', parameters.size())
@@ -206,7 +207,7 @@ if __name__ == "__main__":
     lr_model.load_state_dict(torch.load('pt_model.ckpt'))
 
     pd.DataFrame(train_curve).plot()  # loss曲线
-    plt.show()
+    # plt.show()
     # print(train_curve)
 
     tester = Trainer(lr_model, criterion, optimizer, test_loader, args.n_epoch, device, use_cuda=True)

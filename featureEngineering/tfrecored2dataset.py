@@ -12,11 +12,13 @@ columns = [housing_median_age, median_house_value]
 feature_descriptions = tf.feature_column.make_parse_example_spec(columns)
 feature_descriptions
 
+
 # TFRecord读为dataset
 def parse_examples(serialized_examples):
     examples = tf.io.parse_example(serialized_examples, feature_descriptions)
     targets = examples.pop("median_house_value") # separate the targets
     return examples, targets
+
 
 batch_size = 32
 dataset = tf.data.TFRecordDataset(["my_data_with_features.tfrecords"])

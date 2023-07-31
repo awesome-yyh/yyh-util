@@ -1,4 +1,4 @@
-import  tensorflow as tf
+import tensorflow as tf
 from tensorflow.keras.layers import LayerNormalization, MultiHeadAttention, Dense, Dropout, Embedding, GlobalAveragePooling1D
 
 
@@ -18,6 +18,7 @@ class TokenAndPositionEmbedding(tf.keras.layers.Layer):
         positions = self.pos_emb(positions)
         x = self.token_emb(x)
         return x + positions
+    
     def get_config(self):
         config = super().get_config()
         config.update(
@@ -40,7 +41,7 @@ class TransformerBlock(tf.keras.layers.Layer):
         self.att = MultiHeadAttention(num_heads=num_heads, key_dim=embed_dim)
         self.ffn = tf.keras.Sequential(
             [Dense(dense_dim, activation="relu"), 
-            Dense(embed_dim),]
+             Dense(embed_dim)]
         )
         self.layernorm1 = LayerNormalization(epsilon=1e-6)
         self.layernorm2 = LayerNormalization(epsilon=1e-6)
@@ -117,15 +118,13 @@ class TextTransformerEncoder(tf.keras.Model):
         return tf.keras.models.Model(inputs=[input_], outputs=self.call(input_))
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     model = TextTransformerEncoder(maxlen=400,
-                        max_features=5000,
-                        embedding_dims=400,
-                        num_heads=2,
-                        class_num=2,
-                        last_activation='softmax'
-                        )
+                                   max_features=5000,
+                                   embedding_dims=400,
+                                   num_heads=2,
+                                   class_num=2,
+                                   last_activation='softmax')
     model.build(input_shape=(None, 400))
     model.summary()
-    tf.keras.utils.plot_model(model.build_graph(input_shape=400), "deepLearning/tf/NLP/text_transformer.png",
-                              show_shapes=True)
+    tf.keras.utils.plot_model(model.build_graph(input_shape=400), "deepLearning/tf/NLP/text_transformer.png", show_shapes=True)

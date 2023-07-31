@@ -1,4 +1,5 @@
-import os, datetime
+import os
+import datetime
 import numpy as np
 import pandas as pd
 import tensorflow as tf
@@ -50,12 +51,12 @@ train_dataset, val_dataset, test_dataset = data_preprocess(data_df)
 
 # 搭建模型
 seq_len = 100
-max_words=10000
+max_words = 10000
 model = FastText(maxlen=seq_len,
-                max_features=max_words,
-                embedding_dims=100,
-                class_num=2,
-                last_activation='softmax')
+                 max_features=max_words,
+                 embedding_dims=100,
+                 class_num=2,
+                 last_activation='softmax')
 
 # model = TextCNN(maxlen=seq_len,
 #                 max_features=max_words,
@@ -101,9 +102,9 @@ model = FastText(maxlen=seq_len,
 # tf.keras.utils.plot_model(model.build_graph(seq_len), "NLP/fasttext.png",
 #                         show_shapes=True)
 
-model.compile(optimizer = tf.keras.optimizers.Adam(learning_rate=1e-3), 
-              loss = {"output_1": "categorical_crossentropy"},
-              loss_weights=[1.0], # 为每个损失分配不同的权重
+model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-3), 
+              loss={"output_1": "categorical_crossentropy"},
+              loss_weights=[1.0],  # 为每个损失分配不同的权重
               metrics=['accuracy'])
 
 # 训练模型
@@ -111,12 +112,12 @@ model.compile(optimizer = tf.keras.optimizers.Adam(learning_rate=1e-3),
 early_stopping = tf.keras.callbacks.EarlyStopping(
     monitor='val_accuracy', 
     verbose=1,
-    patience=10, # 每10步检查一下是否提升
-    mode='max', # monitor是准确率时max，是损失时min
+    patience=10,  # 每10步检查一下是否提升
+    mode='max',  # monitor是准确率时max，是损失时min
     restore_best_weights=True)
 
 # tensorboard
-log_dir="./logs/textcnn/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+log_dir = "./logs/textcnn/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 tensorboard_callback = tf.keras.callbacks.TensorBoard(
     log_dir=log_dir, histogram_freq=1, write_graph=True,
     write_images=True, write_steps_per_second=False, update_freq='epoch',
@@ -137,11 +138,11 @@ ckpt_callback = tf.keras.callbacks.ModelCheckpoint(
 #     model.load_weights(ckpt_file_path)
 #     # 若成功加载前面保存的参数，输出下列信息
 #     print("checkpoint_loaded")
-class_weight={
-    0:1.0,
-    1:1.0
+class_weight = {
+    0: 1.0,
+    1: 1.0
 }
-history = model.fit(train_dataset, validation_data = val_dataset,
+history = model.fit(train_dataset, validation_data=val_dataset,
                     callbacks=[early_stopping, tensorboard_callback, ckpt_callback],
                     class_weight=class_weight, epochs=3, verbose=1)
 

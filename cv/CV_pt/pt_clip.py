@@ -2,8 +2,7 @@ from PIL import Image
 import requests
 # import clip
 import torch
-from transformers import BertForSequenceClassification, BertConfig, BertTokenizer
-from transformers import CLIPProcessor, CLIPModel
+from transformers import BertForSequenceClassification, BertConfig, BertTokenizer, CLIPProcessor, CLIPModel
 import numpy as np
 
 
@@ -15,11 +14,12 @@ img_pretrained_model_name = "openai/clip-vit-large-patch14"
 clip_model = CLIPModel.from_pretrained(img_pretrained_model_name)
 processor = CLIPProcessor.from_pretrained(img_pretrained_model_name)
 
-query_texts = ["一只猫", "一只狗",'两只猫', '两只老虎','一只老虎']  # 这里是输入文本的，可以随意替换。
+query_texts = ["一只猫", "一只狗", '两只猫', '两只老虎', '一只老虎']  # 这里是输入文本的，可以随意替换。
 text = text_tokenizer(query_texts, return_tensors='pt', padding=True)['input_ids']
 
 url = "http://images.cocodataset.org/val2017/000000039769.jpg"  # 这里可以换成任意图片的url
 image = processor(images=Image.open(requests.get(url, stream=True).raw), return_tensors="pt")
+# inputs = processor(text=text, images=image, return_tensors="pt", padding=True)
 
 with torch.no_grad():
     image_features = clip_model.get_image_features(**image)

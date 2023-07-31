@@ -6,6 +6,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelBinarizer
 import numpy as np
 
+
 def add_layer(inputs, in_size, out_size, activation_fun=None, layer_name="layer"):
     with tf.name_scope(layer_name):
         with tf.name_scope("weight"):

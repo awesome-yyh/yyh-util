@@ -1,15 +1,14 @@
-import  tensorflow as tf
+import tensorflow as tf
 from tensorflow.keras.layers import Embedding, GlobalAveragePooling1D, Dense
 
 
 class FastText(tf.keras.Model):
     def __init__(self,
-                maxlen,
-                max_features,
-                embedding_dims,
-                class_num,
-                last_activation = 'softmax'
-                ):
+                 maxlen,
+                 max_features,
+                 embedding_dims,
+                 class_num,
+                 last_activation='softmax'):
         '''
         :param maxlen: 文本序列最大长度
         :param max_features: 词汇表大小
@@ -56,17 +55,15 @@ class FastText(tf.keras.Model):
         return tf.keras.models.Model(inputs=[input_], outputs=self.call(input_))
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     model = FastText(maxlen=400,
-                    max_features=5000,
-                    embedding_dims=100,
-                    class_num=2,
-                    last_activation='softmax',
-    )
+                     max_features=5000,
+                     embedding_dims=100,
+                     class_num=2,
+                     last_activation='softmax')
     model.build(input_shape=(None, 400))
     model.summary()
-    tf.keras.utils.plot_model(model.build_graph(400), "NLP/fasttext.png",
-                              show_shapes=True)
+    tf.keras.utils.plot_model(model.build_graph(400), "NLP/fasttext.png", show_shapes=True)
     config = model.get_config()
     print(config)
     

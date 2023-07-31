@@ -10,6 +10,7 @@ Description: dpp多样性核心代码, 包括核矩阵的构造和滑动窗口�
 import numpy as np
 import time
 
+
 def dpp_sw(ids, kernel_matrix, window_size, epsilon=1E-10):
     """
     求解dpp的贪心算法的滑动窗口版
@@ -31,6 +32,7 @@ def dpp_sw(ids, kernel_matrix, window_size, epsilon=1E-10):
     selected_item = np.argmax(di2s)
     selected_items.append(ids[selected_item])
     window_left_index = 0
+    
     while len(selected_items) < max_length:
         k = len(selected_items) - 1
         ci_optimal = cis[window_left_index:k, selected_item]
@@ -64,7 +66,8 @@ def dpp_sw(ids, kernel_matrix, window_size, epsilon=1E-10):
         selected_items.append(ids[selected_item])
     return selected_items
 
-def build_kernel_matrix(scores, feature_vectors, theta = 0.7):
+
+def build_kernel_matrix(scores, feature_vectors, theta=0.7):
     """
     构建核矩阵
     Args:
@@ -81,13 +84,14 @@ def build_kernel_matrix(scores, feature_vectors, theta = 0.7):
     feature_vectors /= np.linalg.norm(feature_vectors, axis=1, keepdims=True)
     similarities = np.dot(feature_vectors, feature_vectors.T) # 对角线上的元素是scores的平方
     
-    alpha = theta / (2.0 * (1-theta)) # 相关性和多样性的trade off
+    alpha = theta / (2.0 * (1 - theta))  # 相关性和多样性的trade off
     scores = np.exp(alpha * scores)
     
-    similarities = (1 + similarities) / 2 # 需要保证任意两个商品的相似度在0到1之间，而inner product的范围在[-1,1]
+    similarities = (1 + similarities) / 2  # 需要保证任意两个商品的相似度在0到1之间，而inner product的范围在[-1,1]
     
     kernel_matrix = scores.reshape((item_size, 1)) * similarities * scores.reshape((1, item_size))
     return kernel_matrix
+
 
 if __name__ == "__main__":
     item_size = 60
@@ -95,7 +99,7 @@ if __name__ == "__main__":
     window_size = 5
     np.random.seed(0)
 
-    scores = np.random.rand(item_size)*3 # 排序分
+    scores = np.random.rand(item_size) * 3  # 排序分
     scores = scores.tolist()
     scores.sort(reverse=True)
     ids = [x for x in range(len(scores))]

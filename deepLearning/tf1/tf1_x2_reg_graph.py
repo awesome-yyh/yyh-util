@@ -2,6 +2,7 @@ import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 def add_layer(inputs, in_size, out_size, activation_fun=None, layer_name="layer"):
     with tf.name_scope(layer_name):
         with tf.name_scope("weight"):

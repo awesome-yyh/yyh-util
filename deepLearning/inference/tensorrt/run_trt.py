@@ -1,14 +1,17 @@
+import os
 import time
 import numpy as np
 from tqdm import tqdm
 from transformers import BertTokenizer
 import tensorrt as trt
-import nvcommon
+import nvcommon as nvcommon
+import pred2label as pred2label
+os.environ["CUDA_VISIBLE_DEVICES"] = "3"
+# 设置gpu卡号时采用os.environ['CUDA_VISIBLE_DEVICES]='2'必须放置在pycuda.autoinit之前。
 try:
     import pycuda.autoprimaryctx
 except ModuleNotFoundError:
     import pycuda.autoinit
-import pred2label
 
 
 class TrtInference():

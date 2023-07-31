@@ -1,4 +1,4 @@
-import  tensorflow as tf
+import tensorflow as tf
 from tensorflow.keras.layers import Embedding, MultiHeadAttention, Dense, GlobalAveragePooling1D
 
 
@@ -63,7 +63,7 @@ class TextSelfAtt(tf.keras.Model):
         return tf.keras.models.Model(inputs=[input_], outputs=self.call(input_))
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     model = TextSelfAtt(maxlen=400,
                         max_features=5000,
                         embedding_dims=400,

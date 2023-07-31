@@ -1,6 +1,8 @@
+import os
 import numpy as np
 import torch
 
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 # pytorch的基本信息
 print("------pytorch的基本信息-------")
@@ -11,19 +13,22 @@ if torch.backends.mps.is_available() and torch.backends.mps.is_built():
     device = "mps"
 print("CPU or GPU: ", device)
 
+# # linux+cuda可用
 # print("cuda是否可用: ", torch.cuda.is_available())
 # print("cuda版本: ", torch.version.cuda)
 # print("cudnn版本: ", torch.backends.cudnn.version())
 # print("GPU数量: ", torch.cuda.device_count())
-# print("GPU0名: ", torch.cuda.get_device_name(0))  # 设备索引默认从0开始
-# print("返回当前设备索引: ", torch.cuda.current_device())
+# for i in range(torch.cuda.device_count()):
+#     print(f"GPU_{i}: ", torch.cuda.get_device_name(i))
+# print("当前设备索引: ", torch.cuda.current_device())
 
 
-# 创建数据及形状修改
+# 创建数据、数据类型及形状修
 print("------创建数据、数据类型及形状修改-------")
 print(type(torch.tensor([[[1, 2, 3], [3, 4, 5]]])))
 print(torch.ones((2, 3, 4)).shape)
-print(torch.arange(12).reshape(3, 4))  # 修改形状
+print(torch.arange(12).reshape(3, 4))  # 修改形状, 相比torch.view，torch.reshape可以自动处理输入张量不连续的情况
+
 print(torch.arange(12))
 print(torch.arange(12).unsqueeze(0))  # 在哪个地方加一个维度, 0是在最外面套括号
 print(torch.arange(12).unsqueeze(1))  # 第1维的每个元素加括号
@@ -36,16 +41,20 @@ print(torch.arange(12).reshape(3, 4).permute(1, 0))  # 维度从m*n变成n*m, �
 q = torch.tensor([1.0, 3.0], dtype=torch.float32)
 a = torch.FloatTensor([1.0, 3.0])  # 和上面的等价
 print(a.dtype)  # torch.float32
+print(a.int().dtype)  # torch.int32
+print(a.int().float().dtype)  # torch.float32
 
 
-# 和numpy协同
-print(torch.zeros((2, 3, 4)).numpy())
+# 与numpy协同
+print("------与numpy协同-------")
+print(torch.zeros((2, 3, 4)).cpu().numpy())
 x = np.array([[1, 2, 3], [4, 5, 6]])
 print(torch.tensor(x))  # 不共享内存
 print(torch.from_numpy(x))  # 共享内存
 
 
 # 数据转到gpu
+print("------数据转到gpu-------")
 tgpu = torch.ones((3, 2, 1)).to('mps')
 print(tgpu.cpu())
 tgpu = torch.ones((3, 2, 1), device='mps')  # 直接在gpu上创建(比在CPU创建后移动到 GPU 上快很多)
@@ -88,9 +97,9 @@ print(torch.mean(A, axis=1))  # [1.5 3.5]
 
 # tensor拼接(同维度拼接)
 print("------tensor拼接-------")
-x = torch.tensor([[1.0, 2.0], 
+x = torch.tensor([[1.0, 2.0],
                  [3.0, 4.0]])
-y = torch.tensor([[5.0, 6.0], 
+y = torch.tensor([[5.0, 6.0],
                  [7.0, 8.0]])
 z0 = torch.cat((x, y), dim=0)
 z1 = torch.cat((x, y), dim=1)
@@ -145,3 +154,27 @@ print("关于x的梯度: ", x.grad)  # 81 = 54+27, 会继续累加
 x.grad.data.zero_()  # 梯度清零
 y.backward()
 print("关于x的梯度: ", x.grad)  # 27, 梯度清零后再求导又得到27
+print(x.detach().numpy())  # 如果Tensor变量带有梯度，转numpy时需要.detach()， 意图脱离梯度，不需要保留梯度信息
+# y.cpu().detach().numpy() 如果在gpu上，需要.cpu()再.detach()
+print(y.detach().numpy())
+
+
+# 查看模型
+from transformers import AutoModelForQuestionAnswering
+
+
+model_name = "deepset/roberta-base-squad2"
+model_name = "luhua/chinese_pretrain_mrc_roberta_wwm_ext_large"
+model = AutoModelForQuestionAnswering.from_pretrained(model_name)
+
+print("查看模型结构: ", model)
+print("Total Parameters:", sum([p.nelement() for p in model.parameters()]))
+print("模型的可训练参数: ")
+for name, parameters in model.named_parameters():
+    print(name, ':', parameters.size())
+print(
+    "总参数量: {:,} B (可训练参数量: {:,} B)".format(
+        sum(p.numel() for p in model.parameters()) / 1e9,
+        sum(p.numel() for p in model.parameters() if p.requires_grad) / 1e9,
+    )
+)

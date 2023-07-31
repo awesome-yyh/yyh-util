@@ -3,8 +3,8 @@ import pandas as pd
 import tensorflow as tf
 
 
-## 对数变换
-log_age = df_train['Age'].apply(lambda x:np.log(x))
+# 对数变换
+log_age = df_train['Age'].apply(lambda x: np.log(x))
 
 # MinMaxscaler（最大最小值缩放）
 from sklearn.preprocessing import MinMaxScaler
@@ -30,20 +30,20 @@ df_train[['Age']].quantile(0.75)
 
 # 高次特征
 from sklearn.preprocessing import PolynomialFeatures
-ply = PolynomialFeatures(degree = 2)
-s = ply.fit_transform(df_train[['Age',"Parch"]])
+ply = PolynomialFeatures(degree=2)
+s = ply.fit_transform(df_train[['Age', "Parch"]])
 
 # 等距切分(分桶)
-df_train.loc[:,'fare_cut'] = pd.cut(df_train['Fare'],3,labels = ['low','medium','high'])
+df_train.loc[:, 'fare_cut'] = pd.cut(df_train['Fare'], 3, labels = ['low', 'medium', 'high'])
 # 等频切分（分桶）
-df_train.loc[:,'fare_qcut'] = pd.qcut(df_train['Fare'],q = [0,0.2,0.5,0.7,0.8,1])
+df_train.loc[:, 'fare_qcut'] = pd.qcut(df_train['Fare'], q=[0, 0.2, 0.5, 0.7, 0.8, 1])
 
 
 # 或tfrecore解析时做特征工程
 feature_columns = []
 
 # 直接使用数值
-for col in ['age','fare','parch','sibsp']:
+for col in ['age', 'fare', 'parch', 'sibsp']:
     feature_columns.append(
         tf.feature_column.numeric_column(col))
 

@@ -5,15 +5,15 @@ import torch.nn.functional as F
 class LeNet_5(nn.Module):
     def __init__(self):
         super(LeNet_5, self).__init__()
-        self.conv1 = nn.Sequential(     #input_size=(1*28*28)
-            nn.Conv2d(1, 6, 5, 1, 2), #padding=2保证输入输出尺寸相同
-            nn.ReLU(),      #input_size=(6*28*28)
-            nn.MaxPool2d(kernel_size=2, stride=2),#output_size=(6*14*14)
+        self.conv1 = nn.Sequential(  # input_size=(1*28*28)
+            nn.Conv2d(1, 6, 5, 1, 2), # padding=2保证输入输出尺寸相同
+            nn.ReLU(),  #input_size=(6*28*28)
+            nn.MaxPool2d(kernel_size=2, stride=2),  #output_size=(6*14*14)
         )
         self.conv2 = nn.Sequential(
             nn.Conv2d(6, 16, 5),
-            nn.ReLU(),      #input_size=(16*10*10)
-            nn.MaxPool2d(2, 2)  #output_size=(16*5*5)
+            nn.ReLU(),  # input_size=(16*10*10)
+            nn.MaxPool2d(2, 2)  # output_size=(16*5*5)
         )
         self.fc1 = nn.Sequential(
             nn.Linear(16 * 5 * 5, 120),

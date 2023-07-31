@@ -6,6 +6,7 @@ from torch import nn
 from typing import List, Optional
 from transformers.activations import ACT2FN
 
+
 def seed_everything(seed=1029):
     random.seed(seed)
     os.environ['PYTHONHASHSEED'] = str(seed)
@@ -16,6 +17,7 @@ def seed_everything(seed=1029):
     # some cudnn methods can be random even after fixing the seed
     # unless you tell it to be deterministic
     torch.backends.cudnn.deterministic = True
+
 
 class CRF(nn.Module):
     """Conditional random field.
@@ -424,6 +426,7 @@ class CRF(nn.Module):
             best_tags_arr[idx] = best_tags.data.view(batch_size, -1) // nbest
 
         return torch.where(mask.unsqueeze(-1), best_tags_arr, oor_tag).permute(2, 1, 0)
+
 
 class FullyConnectedLayer(nn.Module):
     def __init__(self, config, input_dim, output_dim, dropout_prob):

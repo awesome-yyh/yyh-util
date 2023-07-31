@@ -7,20 +7,13 @@ LastEditTime: 2022-08-23 18:04:56
 Description: dpp多样性核心代码, 包括核矩阵的构造和滑动窗口式dpp计算, 使用pytorch进行矩阵运算
 向量d维, 物品k个, 需要d>=k
 '''
-import os
 import numpy as np
 import torch
 import torch.nn.functional as F
 import time
-import requests,json
-import logging
 
 
-os.environ["CUDA_VISIBLE_DEVICES"] = '2'
-
-device = "cuda" if torch.cuda.is_available() else "cpu"
-if torch.backends.mps.is_available() and torch.backends.mps.is_built():
-    device = "mps"
+device = "cuda:2" if torch.cuda.is_available() else "cpu"
 print("CPU or GPU: ", device)
 
 
@@ -45,6 +38,7 @@ def dpp_sw(ids, kernel_matrix, window_size, epsilon=1E-10):
     selected_item = torch.argmax(di2s)
     selected_items.append(ids[selected_item])
     window_left_index = 0
+    
     while len(selected_items) < max_length:
         k = len(selected_items) - 1
         ci_optimal = cis[window_left_index:k, selected_item]
@@ -76,6 +70,7 @@ def dpp_sw(ids, kernel_matrix, window_size, epsilon=1E-10):
         if di2s[selected_item] < epsilon:
             break
         selected_items.append(ids[selected_item])
+    
     return selected_items
 
 
