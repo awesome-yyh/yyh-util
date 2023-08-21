@@ -219,7 +219,7 @@ if __name__ == '__main__':  # 这个地方可以解决多线程的问题
     with torch.no_grad():
         test_text = ['我不喜欢打篮球']
         test = MyDataset(test_text, labels=None, with_labels=False)
-        x = test.__getitem__(0)
+        x = test[0]
         x = tuple(p.unsqueeze(0).to(device) for p in x)  # 增加一维，因为是要按batch输入模型
         pred = bc_model([x[0], x[1], x[2]])
         pred = pred.argmax(1)

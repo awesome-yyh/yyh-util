@@ -7,8 +7,11 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 # pytorch的基本信息
 print("------pytorch的基本信息-------")
 print("pytorch version: ", torch.__version__)
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
+# mac
 if torch.backends.mps.is_available() and torch.backends.mps.is_built():
     device = "mps"
 print("CPU or GPU: ", device)
@@ -38,7 +41,7 @@ print(torch.arange(12).unsqueeze(0).squeeze(1))  # 如果这个维度的元素�
 
 print(torch.arange(12).reshape(3, 4).permute(1, 0))  # 维度从m*n变成n*m, 对于二维相当于转置
 
-q = torch.tensor([1.0, 3.0], dtype=torch.float32)
+q = torch.tensor([1.0, 3.0], dtype=torch.float32)  # torch.Tensor()大写是类 不能指定数据类型，torch.tensor()小写是函数，更灵活，可指定数据类型或自动推断数据类型
 a = torch.FloatTensor([1.0, 3.0])  # 和上面的等价
 print(a.dtype)  # torch.float32
 print(a.int().dtype)  # torch.int32
@@ -107,14 +110,13 @@ print(z0)
 print(z1)
 
 # tensor stack(扩张维度后再拼接)
-# 在自然语言处理和卷及神经网络中， 通常为了保留–[序列(先后)信息] 和 [张量的矩阵信息] 才会使用stack。
 print("------tensor stack-------")
 x = torch.tensor([[1.0, 2.0], 
                  [3.0, 4.0]])
 y = torch.tensor([[5.0, 6.0], 
                  [7.0, 8.0]])
-z0 = torch.stack((x, y), dim=0)
-z1 = torch.stack((x, y), dim=1)
+z0 = torch.stack((x, y), dim=0)  # Tensor[x, y] # 扩展一个维度，先写x再写y
+z1 = torch.stack((x, y), dim=1)  # Tensor[[x0,y0], [x1, y1]] 按索引依次拿出来组成一对
 print(z0)
 print(z1)
 

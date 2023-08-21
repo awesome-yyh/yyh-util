@@ -5,14 +5,17 @@ import torch
 from transformers import BertTokenizer, AutoModelForMaskedLM
 
 
-MODEL_PATH = "/data/app/base_model/chinese-roberta-wwm-ext"
+MODEL_PATH = "hfl/chinese-roberta-wwm-ext"
+
 tokenizer = BertTokenizer.from_pretrained(MODEL_PATH)
 model = AutoModelForMaskedLM.from_pretrained(MODEL_PATH)
 
 text = "这个宾馆比较陈旧了，特价的房间也很一般。这种体验很[MASK]。"
 
 inputs = tokenizer(text, return_tensors="pt")
+
 outputs = model(**inputs)
+
 token_logits = outputs.logits
 print(token_logits.shape)  # torch.Size([1, 29, 21128]), 而inputs.input_ids.shape=torch.Size([1, 29]), 即这个logits是每个input token的在词汇表中的映射
 
@@ -22,6 +25,8 @@ print(mask_token_index)
 
 # 找到[mask]位置的logits
 mask_token_logits = token_logits[0, mask_token_index, :]
+
+print(mask_token_logits.shape)
 
 # 找到 [MASK]位置的 最可能的n个候选
 top_5_tokens_id = torch.topk(mask_token_logits, 5, dim=1).indices[0].tolist()

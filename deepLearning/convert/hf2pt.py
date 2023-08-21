@@ -42,14 +42,13 @@ class MyNet(nn.Module):
 
 
 if __name__ == "__main__":
-    hf_model = "/data/app/base_model/shibing624-text2vec-base-chinese"
-    # hf_model = "/data/app/base_model/IDEA-CCNL-Randeng-T5-784M-MultiTask-Chinese"
+    hf_model = "shibing624-text2vec-base-chinese"
 
     input_model_state = None
-    # input_model_state = "api_model/checkpoints/e4f117_mp_rank_00_model_states.pt"
+    # input_model_state = "checkpoints/e4f117_mp_rank_00_model_states.pt"
 
     peft_model_id = None
-    # peft_model_id = "api_model/lora/embellish/epoch_29_file_1_end_global_step9720"
+    # peft_model_id = "lora/epoch_29_file_1_end_global_step9720"
 
     my_model = MyNet(hf_model, input_model_state=input_model_state, peft_model_id=peft_model_id)
 
@@ -58,7 +57,7 @@ if __name__ == "__main__":
     my_model = my_model.to(device)
     tokenizer = BertTokenizer.from_pretrained(hf_model)
 
-    sentences = ['10月组织四川平民学社，并出版刊物《》。', '爝光', '曙光']
+    sentences = ['今天是星期六', '晴天', '雨天']
     # Tokenize sentences
     encoded_input = tokenizer(sentences, max_length=128, padding=True, truncation=True, return_tensors='pt').to(device)
     # Compute token embeddings

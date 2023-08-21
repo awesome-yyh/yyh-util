@@ -1,19 +1,19 @@
 import os
+from pathlib import Path
 import torch
 from transformers import AutoModelForSeq2SeqLM, BertTokenizer, BertModel
 from peft import PeftModel, PeftConfig
 
 
-hf_model = "/data/app/base_model/shibing624-text2vec-base-chinese"
-# hf_model = "/data/app/base_model/IDEA-CCNL-Randeng-T5-784M-MultiTask-Chinese"
+hf_model = "shibing624-text2vec-base-chinese"
 
 input_model_state = None
-# input_model_state = "api_model/checkpoints/e4f117_mp_rank_00_model_states.pt"
+# input_model_state = "checkpoints/e4f117_mp_rank_00_model_states.pt"
 
 peft_model_id = None
-# peft_model_id = "api_model/lora/embellish/epoch_29_file_1_end_global_step9720"
+# peft_model_id = "lora/epoch_29_file_1_end_global_step9720"
 
-output_model_pretrained = hf_model
+output_model_pretrained = Path(input_model_state).parent
 
 # model = AutoModelForSeq2SeqLM.from_pretrained(hf_model)
 model = BertModel.from_pretrained(hf_model)
@@ -32,6 +32,7 @@ if peft_model_id:
 
 # 保存为huggingface格式
 model.save_pretrained(output_model_pretrained)  # 指定保存路径
+print("模型已保存在: ", output_model_pretrained)
 
 # 之后推理时即可直接使用
-# model = AutoModelForSeq2SeqLM.from_pretrained("api_model/checkpoints/wenxiu3.bin")
+# model = AutoModelForSeq2SeqLM.from_pretrained("checkpoints/model.bin")
