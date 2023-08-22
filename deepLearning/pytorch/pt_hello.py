@@ -7,17 +7,14 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 # pytorch的基本信息
 print("------pytorch的基本信息-------")
 print("pytorch version: ", torch.__version__)
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  # linux
 
-device = "cuda" if torch.cuda.is_available() else "cpu"
-# mac
-if torch.backends.mps.is_available() and torch.backends.mps.is_built():
-    device = "mps"
+device = torch.device("mps" if torch.backends.mps.is_available() and torch.backends.mps.is_built() else "cpu")  # mac
+
 print("CPU or GPU: ", device)
 
 # # linux+cuda可用
-# print("cuda是否可用: ", torch.cuda.is_available())
 # print("cuda版本: ", torch.version.cuda)
 # print("cudnn版本: ", torch.backends.cudnn.version())
 # print("GPU数量: ", torch.cuda.device_count())
@@ -26,26 +23,62 @@ print("CPU or GPU: ", device)
 # print("当前设备索引: ", torch.cuda.current_device())
 
 
-# 创建数据、数据类型及形状修
-print("------创建数据、数据类型及形状修改-------")
-print(type(torch.tensor([[[1, 2, 3], [3, 4, 5]]])))
-print(torch.ones((2, 3, 4)).shape)
+# tensor创建、类型、形状
+print("------ tensor创建、类型、形状 -------")
+t = torch.ones((2, 3, 4))  # torch.float32
+t = torch.full([3, 4], 1.5)  # 3行4列，元素全是1.5，torch.float32
+t = torch.arange(12)  # torch.int64
+t = torch.tensor([[[1, 2, 3], [3, 4, 5]]])  # torch.int64
+t = torch.tensor([1.0, 3.0], dtype=torch.float32)  # torch.Tensor()大写是类 不能指定数据类型，torch.tensor()小写是函数，更灵活，可指定数据类型或自动推断数据类型
+a = torch.FloatTensor([1.0, 3.0])  # 和上面的等价
+print(a.dtype)  # torch.float32
+print(a.int().dtype)  # torch.int32
+print(a.int().float().dtype)  # torch.float32
+
+print("查看形状: ", t.shape)
 print(torch.arange(12).reshape(3, 4))  # 修改形状, 相比torch.view，torch.reshape可以自动处理输入张量不连续的情况
 
-print(torch.arange(12))
+print(torch.transpose(torch.arange(12).reshape(3, 4), dim0=0, dim1=1))  # 只能2个维度之间进行转置
+print(torch.arange(12).reshape(3, 4).permute(1, 0))  # 维度从m*n变成n*m, 对于二维相当于转置，可以一次性进行多个维度的转置
+# 在使用transpose或permute之后，若要使用view()改变其形状，必须先contiguous()
+
 print(torch.arange(12).unsqueeze(0))  # 在哪个地方加一个维度, 0是在最外面套括号
 print(torch.arange(12).unsqueeze(1))  # 第1维的每个元素加括号
 
 print(torch.arange(12).unsqueeze(0).squeeze(0))  # 去掉哪个一个维度，0是最外面的括号
 print(torch.arange(12).unsqueeze(0).squeeze(1))  # 如果这个维度的元素大于1则不做处理
 
-print(torch.arange(12).reshape(3, 4).permute(1, 0))  # 维度从m*n变成n*m, 对于二维相当于转置
 
-q = torch.tensor([1.0, 3.0], dtype=torch.float32)  # torch.Tensor()大写是类 不能指定数据类型，torch.tensor()小写是函数，更灵活，可指定数据类型或自动推断数据类型
-a = torch.FloatTensor([1.0, 3.0])  # 和上面的等价
-print(a.dtype)  # torch.float32
-print(a.int().dtype)  # torch.int32
-print(a.int().float().dtype)  # torch.float32
+# 元素访问和修改
+print("------元素的索引访问和修改-------")
+x = torch.tensor([[1.0, 2.0],
+                 [3.0, 4.0]])
+print(x[-1], x[0:1], x[0, 1].item())
+x[0, 1] = 99  # 原地操作（在原内存地址修改并生效）
+print(x)
+
+
+# tensor拼接(同维度拼接)
+print("------tensor拼接-------")
+x = torch.tensor([[1.0, 2.0],
+                 [3.0, 4.0]])
+y = torch.tensor([[5.0, 6.0],
+                 [7.0, 8.0]])
+z0 = torch.cat((x, y), dim=0)
+z1 = torch.cat((x, y), dim=1)
+print(z0)
+print(z1)
+
+# tensor stack(扩张维度后再拼接)
+print("------tensor stack-------")
+x = torch.tensor([[1.0, 2.0],
+                 [3.0, 4.0]])
+y = torch.tensor([[5.0, 6.0],
+                 [7.0, 8.0]])
+z0 = torch.stack((x, y), dim=0)  # Tensor[x, y] # 扩展一个维度，先写x再写y
+z1 = torch.stack((x, y), dim=1)  # Tensor[[x0,y0], [x1, y1]] 按索引依次拿出来组成一对
+print(z0)
+print(z1)
 
 
 # 与numpy协同
@@ -62,15 +95,6 @@ tgpu = torch.ones((3, 2, 1)).to('mps')
 print(tgpu.cpu())
 tgpu = torch.ones((3, 2, 1), device='mps')  # 直接在gpu上创建(比在CPU创建后移动到 GPU 上快很多)
 print(tgpu.cpu().numpy())  # gpu上的数先转到cpu后才能转numpy, numpy不支持gpu
-
-
-# 元素访问和修改
-print("------元素的索引访问和修改-------")
-x = torch.tensor([[1.0, 2.0],
-                 [3.0, 4.0]])
-print(x[-1], x[0:1], x[0, 1].item())
-x[0, 1] = 99  # 原地操作（在原内存地址修改并生效）
-print(x)
 
 
 # 四则运算
@@ -96,29 +120,6 @@ print(torch.max(A))  # 4, 最大值
 print(torch.argmax(A))  # 3, 最大值的索引
 print(torch.mean(A))  # 2.5 所有元素的平均值
 print(torch.mean(A, axis=1))  # [1.5 3.5]
-
-
-# tensor拼接(同维度拼接)
-print("------tensor拼接-------")
-x = torch.tensor([[1.0, 2.0],
-                 [3.0, 4.0]])
-y = torch.tensor([[5.0, 6.0],
-                 [7.0, 8.0]])
-z0 = torch.cat((x, y), dim=0)
-z1 = torch.cat((x, y), dim=1)
-print(z0)
-print(z1)
-
-# tensor stack(扩张维度后再拼接)
-print("------tensor stack-------")
-x = torch.tensor([[1.0, 2.0], 
-                 [3.0, 4.0]])
-y = torch.tensor([[5.0, 6.0], 
-                 [7.0, 8.0]])
-z0 = torch.stack((x, y), dim=0)  # Tensor[x, y] # 扩展一个维度，先写x再写y
-z1 = torch.stack((x, y), dim=1)  # Tensor[[x0,y0], [x1, y1]] 按索引依次拿出来组成一对
-print(z0)
-print(z1)
 
 
 # 模型的参数初始化
@@ -162,15 +163,14 @@ print(y.detach().numpy())
 
 
 # 查看模型
-from transformers import AutoModelForQuestionAnswering
+print("------查看模型-------")
+from transformers import BertModel
 
+model_path = "/data/app/yangyahe/base_model/chinese-roberta-wwm-ext"
 
-model_name = "deepset/roberta-base-squad2"
-model_name = "luhua/chinese_pretrain_mrc_roberta_wwm_ext_large"
-model = AutoModelForQuestionAnswering.from_pretrained(model_name)
+model = BertModel.from_pretrained(model_path)
 
 print("查看模型结构: ", model)
-print("Total Parameters:", sum([p.nelement() for p in model.parameters()]))
 print("模型的可训练参数: ")
 for name, parameters in model.named_parameters():
     print(name, ':', parameters.size())

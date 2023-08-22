@@ -2,9 +2,10 @@ import torch
 import torch.nn as nn
 
 
+print("=== linear ===")
 class Linear(nn.Module):
     def __init__(self, in_features, out_features):
-        super(Linear, self).__init__()  # 等价于nn.Module.__init__(self)
+        super(Linear, self).__init__()
         self.w = nn.Parameter(torch.randn(in_features, out_features))
         self.b = nn.Parameter(torch.randn(out_features))
     
@@ -13,7 +14,11 @@ class Linear(nn.Module):
         return x + self.b.expand_as(x)
 
 
-
+print("=== MultiheadAttention ===")
+m = nn.Linear(20, 30)
+input = torch.randn(128, 20)
+output = m(input)
+print(output.size())
 
 q = torch.tensor([[[1, 2, 3], [3, 4, 5]], [[1, 2, 3], [3, 4, 5]]], dtype=torch.float32)
 k = torch.tensor([[[1, 2, 3], [3, 4, 5]],
@@ -22,13 +27,13 @@ k = torch.tensor([[[1, 2, 3], [3, 4, 5]],
 # v = torch.empty(k.shape, dtype=torch.float32)
 v = k
 print(q.shape, k.shape, v.shape)
-print(q.dtype, k.dtype, v.dtype)
 token_attn = nn.MultiheadAttention(embed_dim=3, num_heads=1, dropout=0.3, batch_first=False)
-attn_output, _ = token_attn(q, k, v)
+attn_output, attn_output_weights = token_attn(q, k, v)
 print(attn_output)
 print(attn_output[0].shape)
 
 
+print("=== Transformer ===")
 # nn.Transformer主要由两部分构成：nn.TransformerEncoder和nn.TransformerDecoder。
 # 而nn.TransformerEncoder又是由多个nn.TransformerEncoderLayer堆叠而成的
 transformer = nn.Transformer(d_model=3, nhead=1, batch_first=False)
@@ -38,8 +43,30 @@ print(trans_output[-1])
 print(trans_output[-1].shape)
 
 
+print("=== TransformerEncoderLayer ===")
 # nn.TransformerEncoderLayer 由自注意力和前向传播组成
 encoder_layer = nn.TransformerEncoderLayer(d_model=128, nhead=8, batch_first=True)
 src = torch.rand(32, 10, 128)
 out = encoder_layer(src)
 print("TransformerEncoderLayer: ", out)
+
+
+print("=== LayerNorm ===")
+batch, sentence_length, embedding_dim = 20, 5, 10
+embedding = torch.randn(batch, sentence_length, embedding_dim)
+layer_norm = nn.LayerNorm(embedding_dim)
+# Activate module
+print(layer_norm(embedding))
+
+
+# an Embedding module containing 10 tensors of size 3
+embedding = nn.Embedding(10, 3)
+# a batch of 2 samples of 4 indices each
+input = torch.LongTensor([[1, 2, 4, 5], [4, 3, 2, 9]])
+embedding(input)
+
+
+print("=== Embedding ===")
+embedding = nn.Embedding(10, 3, padding_idx=0)
+input = torch.LongTensor([[0, 2, 0, 5]])
+embedding(input)
