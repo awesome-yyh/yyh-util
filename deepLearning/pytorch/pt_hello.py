@@ -1,6 +1,8 @@
 import os
 import numpy as np
 import torch
+import torch.nn.functional as F
+
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
@@ -25,12 +27,16 @@ print("CPU or GPU: ", device)
 
 # tensor创建、类型、形状
 print("------ tensor创建、类型、形状 -------")
+torch.random.manual_seed(3)
 t = torch.ones((2, 3, 4))  # torch.float32
 t = torch.full([3, 4], 1.5)  # 3行4列，元素全是1.5，torch.float32
-t = torch.arange(12)  # torch.int64
+print(torch.eye(3, device="cuda:0"))  # 单位矩阵
+print(torch.eye(3, device=t.device))  # 单位矩阵
+t = torch.arange(12).to(t.device)  # torch.int64
 t = torch.tensor([[[1, 2, 3], [3, 4, 5]]])  # torch.int64
 t = torch.tensor([1.0, 3.0], dtype=torch.float32)  # torch.Tensor()大写是类 不能指定数据类型，torch.tensor()小写是函数，更灵活，可指定数据类型或自动推断数据类型
 a = torch.FloatTensor([1.0, 3.0])  # 和上面的等价
+
 print(a.dtype)  # torch.float32
 print(a.int().dtype)  # torch.int32
 print(a.int().float().dtype)  # torch.float32
@@ -48,6 +54,10 @@ print(torch.arange(12).unsqueeze(1))  # 第1维的每个元素加括号
 print(torch.arange(12).unsqueeze(0).squeeze(0))  # 去掉哪个一个维度，0是最外面的括号
 print(torch.arange(12).unsqueeze(0).squeeze(1))  # 如果这个维度的元素大于1则不做处理
 
+feats1 = torch.tensor([[1, 2, 3, 4, 5], [6, 6, 7, 8, 9], [10, 13, 10, 11, 12]], dtype=torch.float32)
+feats2 = torch.tensor([[1, 2, 3, 4, 5], [6, 5, 7, 8, 9], [10, 13, 10, 11, 13]], dtype=torch.float32)
+cos_sim = F.cosine_similarity(feats1.unsqueeze(1), feats2.unsqueeze(0), dim=-1)  # 计算2组向量两两间的相似度
+print(cos_sim)
 
 # 元素访问和修改
 print("------元素的索引访问和修改-------")
@@ -56,7 +66,11 @@ x = torch.tensor([[1.0, 2.0],
 print(x[-1], x[0:1], x[0, 1].item())
 x[0, 1] = 99  # 原地操作（在原内存地址修改并生效）
 print(x)
-
+print("=== roll ===")
+x = torch.tensor([1, 2, 3, 4, 5, 6, 7, 8]).view(4, 2)
+print(x)
+x = x.roll(shifts=1, dims=0)  # 沿着指定的轴dims，滚动元素shifts次
+print(x)
 
 # tensor拼接(同维度拼接)
 print("------tensor拼接-------")
@@ -83,11 +97,15 @@ print(z1)
 
 # 与numpy协同
 print("------与numpy协同-------")
-print(torch.zeros((2, 3, 4)).cpu().numpy())
 x = np.array([[1, 2, 3], [4, 5, 6]])
 print(torch.tensor(x))  # 不共享内存
 print(torch.from_numpy(x))  # 共享内存
+print(torch.zeros((2, 3, 4)).cpu().numpy())
 
+# 与python list协同
+print("------与python list协同-------")
+t = torch.tensor([[[1, 2, 3], [3, 4, 5]]])  # torch.int64
+print(torch.zeros((2, 3, 4)).tolist())
 
 # 数据转到gpu
 print("------数据转到gpu-------")

@@ -9,8 +9,10 @@ optimizer = torch.optim.SGD(model.parameters(), lr=0.1, momentum=0.9)
 
 one_cycle_lr = []
 one_cycle_scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=0.01, total_steps=1000)
+
 cos_lr = []
 cos_scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, T_0=100, T_mult=2)
+
 linear_lr = []
 linear_scheduler = get_linear_schedule_with_warmup(
     optimizer, num_warmup_steps=50, num_training_steps=1000)

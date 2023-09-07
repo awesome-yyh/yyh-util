@@ -9,7 +9,7 @@ print("config: ", config, type(config))
 
 tokenizer = BertTokenizer.from_pretrained(pretrained_model_name)
 
-text1 = "北京，上海"
+text1 = "北京，上#海[MASK]"
 text2 = "南京，上海，天津"
 maxlen = 11
 
