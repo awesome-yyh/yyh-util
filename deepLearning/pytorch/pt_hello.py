@@ -30,7 +30,7 @@ print("------ tensor创建、类型、形状 -------")
 torch.random.manual_seed(3)
 t = torch.ones((2, 3, 4))  # torch.float32
 t = torch.full([3, 4], 1.5)  # 3行4列，元素全是1.5，torch.float32
-print(torch.eye(3, device="cuda:0"))  # 单位矩阵
+# print(torch.eye(3, device="cuda:0"))  # 单位矩阵
 print(torch.eye(3, device=t.device))  # 单位矩阵
 t = torch.arange(12).to(t.device)  # torch.int64
 t = torch.tensor([[[1, 2, 3], [3, 4, 5]]])  # torch.int64
@@ -134,6 +134,9 @@ print(A * B)  # 同上, [[5,12],[21,32]] 对应位置相乘
 
 # 统计运算
 print("------统计运算-------")
+tensor = torch.tensor([-1, -0.3, -0.6, 0, 0.3, 0.6, 1])
+print("大于0.5的个数: ", torch.sum(torch.gt(tensor, 0.5)).item())
+print("小于0.5的个数: ", torch.sum(torch.lt(tensor, 0.5)).item())
 print(torch.max(A))  # 4, 最大值
 print(torch.argmax(A))  # 3, 最大值的索引
 print(torch.mean(A))  # 2.5 所有元素的平均值

@@ -1,69 +1,65 @@
-import os
-import lmdb
+if __name__ == "__main__":
+    from zlmdb_abc import ZLMDBABC
+else:
+    from .zlmdb_abc import ZLMDBABC
 
 
-class ZLMDB():
-    def __init__(self, lmdb_path, map_size=int(1e12)):
-        
-        os.makedirs(lmdb_path, exist_ok=True)
-        self.db = lmdb.open(lmdb_path, map_size, lock=False, max_readers=126)  # lmdb.Environment的别名
-        
-        self.train_data_len = int(self.get("train_data_len")) if self.get("train_data_len") else 0
-        print("train_data_len:", self.train_data_len)
-
-    def _put(self, k, v):
-        # 增加和修改都是这个
-        with self.db.begin(write=True) as txn:
-            txn.put(key=str(k).encode(), value=str(v).encode())
-
-    def delete(self, key):
-        # 删除
-        with self.db.begin(write=True) as txn:
-            txn.delete(key=str(key).encode())
-
-    def get(self, k):
-        # 查询
-        with self.db.begin(write=True) as txn:
-            v = txn.get(str(k).encode())
-            if v:
-                v = str(v, encoding='utf-8')
-            return v
-
-    def display(self, n=10):
-        # 遍历前n项
-        with self.db.begin() as txn:
-            for count, (key, value) in enumerate(txn.cursor()):
-                print(key, value)
-                if count >= n:
-                    break
-
-    def put_io(self, instruction, input, output):
-        self._put(f'instruction_{self.train_data_len}', instruction)
-        self._put(f'input_{self.train_data_len}', input)
-        self._put(f'output_{self.train_data_len}', output)
+class ZLMDB(ZLMDBABC):
+    def put_io(self, seq1: str, seq2: str):
+        self._put(f"seq1_{self.train_data_len}", seq1)
+        self._put(f"seq2_{self.train_data_len}", seq2)
         
         self.train_data_len += 1
         self._put("train_data_len", self.train_data_len)
-
+    
     def get_io(self, idx):
-        instruction = self.get(f'instruction_{idx}')
-        input = self.get(f'input_{idx}')
-        output = self.get(f'output_{idx}')
+        seq1 = self._get(f'seq1_{idx}')
+        seq2 = self._get(f'seq2_{idx}')
         
-        return instruction, input, output
+        return seq1, seq2
+    
+    def put_emb(self, term, emb):
+        self._put(f'term_emb_{term}', emb)
+        
+        self.train_data_len += 1
+        self._put("train_data_len", self.train_data_len)
+    
+    def get_emb(self, term):
+        emb = self._get(f'term_emb_{term}')
+        if emb is not None:
+            emb = eval(emb)[0]
+        return emb
 
-    def __del__(self,):
-        self.db.close()
+    def put_io_triplet(self, anchor: str, pos: str, neg: str):
+        self._put(f"anchor_{self.train_data_len}", anchor)
+        self._put(f"pos_{self.train_data_len}", pos)
+        self._put(f"neg_{self.train_data_len}", neg)
+        
+        self.train_data_len += 1
+        self._put("train_data_len", self.train_data_len)
+    
+    def get_io_triplet(self, idx):
+        anchor = self._get(f'anchor_{idx}')
+        pos = self._get(f'pos_{idx}')
+        neg = self._get(f'neg_{idx}')
+        
+        return anchor, pos, neg
 
 
 if __name__ == '__main__':
-    data_file = "data/train_lmdb/train_09"
+    data_file = "data/termonline_emb_lmdb_ptxxxx"
     db = ZLMDB(lmdb_path=data_file)
+    print("len: ", len(db))
     
-    db.display(10)
+    # db.put_io('as', 'qw')
     
-    print(db.get("train_data_len"), type(db.get("train_data_len")))
+    # db.display(10)
     
-    db.put_io('as', 'qw', 's')
+    # print(db.get_io(0))
+    # print(db.get_io(1))
     
-    print(db.get_io(0))
+    # print(db.get_emb("马尔可夫过程"))
+    # print(db.get_emb("无障碍设计"))
+    
+    print(db.get_io_triplet(0))
+    print(db.get_io_triplet(1))

@@ -56,7 +56,7 @@ print("=== CosineEmbeddingLoss ===")
 criterion = nn.CosineEmbeddingLoss()
 x1 = torch.tensor([[1.0617, 1.3397, -0.2303],
                   [0.3459, -0.9821, 1.2511]])
-x2 = torch.tensor([[-1.3730, 0.0183, -1.2268],
+x2 = torch.tensor([[1.0617, 1.3397, -0.2303],
                   [0.4486, -0.6504, 1.5173]])
 target = torch.tensor([1, -1])
 
@@ -80,36 +80,52 @@ print(criterion(x1, x2, target))
 print("=== TripletMarginWithDistanceLoss ===")
 # Triplet, 正样本接近anchor，负样本远离anchor, 并可自定义距离函数
 # max(d(a,p) - d(a,n) + margin, 0)
-criterion = nn.TripletMarginWithDistanceLoss(distance_function=nn.CosineSimilarity(dim=1), margin=1.0)
-# distance_function=nn.PairwiseDistance(p=2)  # p范数距离
-# distance_function=nn.CosineSimilarity(dim=1)  # 余弦相似距离
-positive = torch.randn(100, 128, requires_grad=True)
-negative = torch.randn(100, 128, requires_grad=True)
-anchor = torch.ones_like(positive)
-# anchor = torch.randn(100, 128, requires_grad=True)
 
+
+def cosine_distance(x1, x2):
+    """
+    相似趋于0, 不相似趋于1
+    """
+    cosine_similarity = nn.CosineSimilarity(dim=1)  # 余弦相似距离
+    print("cosine_similarity: ", cosine_similarity(x1, x2))
+    return (1 - cosine_similarity(x1, x2)) / 2
+
+
+criterion = nn.TripletMarginWithDistanceLoss(distance_function=cosine_distance, margin=1.0)
+# distance_function=nn.PairwiseDistance(p=2)  # 与锚点的p范数距离
+# cosine_distance # 与锚向量的余弦距离
+
+positive = torch.tensor([[1.0617, 1.3397, -0.2303],
+                        [0.3459, -0.9821, 1.2511]])
+negative = torch.tensor([[-2.0617, -0.3397, 0.82303],
+                        [-0.3459, 0.9821, -1.2511]])
+anchor = positive
+print("cosine_distance: ", cosine_distance(positive, positive))
+print("triplet loss: ", criterion(positive, positive, negative))
+print("not cosine_distance: ", cosine_distance(positive, negative))
+print("not triplet loss: ", criterion(negative, positive, negative))
+# anchor = torch.ones_like(positive)  # 锚点
+anchor = torch.tensor([[-1.0617, -1.3397, -1.2303],
+                      [1.3459, 1.9821, -0.2511]])
 print(criterion(anchor, positive, negative))
+
+nn.TripletMarginWithDistanceLoss
+print("=== InfoNCE ===")
 
 
 class InfoNCELoss(nn.Module):
-    """
-    在一个minibatch内，同类样本对(对角线元素)相似, 不同类样本对(非对角线元素)远离
-    -log(exp(正例对相似度/t) / sum(exp(所有元素相似度/t)))
-    """
     def __init__(self, temperature=0.5) -> None:
         super().__init__()
         self.temperature = temperature
         
     def forward(self, proj_1, proj_2):
         # Calculate cosine similarity
-        cos_sim = F.cosine_similarity(proj_1.unsqueeze(1), proj_2.unsqueeze(0), dim=-1)
-        # print(cos_sim)
+        cos_sim = nn.CosineSimilarity(dim=-1)(proj_1.unsqueeze(1), proj_2.unsqueeze(0))
         # InfoNCE loss
-        loss = -F.log_softmax(cos_sim / self.temperature, dim=1).diag().mean()
-        return loss
+        loss = -nn.LogSoftmax(dim=1)(cos_sim / self.temperature).diag().mean()
+        return cos_sim, loss
 
 
-print("=== InfoNCE ===")
 criterion = InfoNCELoss()
 feats1 = torch.tensor([[1, 2, 3, 4, 5], [6, 6, 7, 8, 9], [10, 13, 10, 11, 12]], dtype=torch.float32)
 feats2 = torch.tensor([[1, 2, 3, 4, 5], [6, 5, 7, 8, 9], [10, 13, 10, 11, 13]], dtype=torch.float32)
