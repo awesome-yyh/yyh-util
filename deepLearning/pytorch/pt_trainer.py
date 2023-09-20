@@ -10,48 +10,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import torch
 import torch.nn as nn
-import torch.utils.data as Data
 import torch.optim as optim
-
-
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"  # "0,1" ，根据顺序表示优先使用0号设备,然后使用1号设备
-
-
-class MyDataset(Data.Dataset):
-    """构造Dataset"""
-    def __init__(self, inputs, labels=None, with_labels=True, transforms=None):
-        self.inputs = inputs
-        self.labels = labels
-        self.with_labels = with_labels
-        self.transforms = transforms
-        
-    def __len__(self):
-        return len(self.inputs)
-
-    def __getitem__(self, index):
-        input_i = self.inputs[index]
-        # 如果数据以文件格式，可以在init做好文件路径list，在此处按index正式读取文件
-        if self.transforms:
-            input_i = self.transforms(input_i)
-            # 特征工程(数值、类别、时间、文本(大小写、标点)、图像)
-
-        if self.with_labels:
-            label = self.labels[index]
-            return input_i, label
-        else:
-            return input_i
-
-
-class Linear(nn.Module):
-    """搭建model"""
-    def __init__(self, in_features, out_features):
-        super(Linear, self).__init__()
-        self.linear = nn.Linear(in_features, out_features)  # 包括两个可训练参数: weight和bias
-
-    def forward(self, X):  # 直接调用对象时, 会自动将传入的参数传到forward函数当中进行计算
-        logits = self.linear(X)
-
-        return logits
+import torch.utils.data as Data
 
 
 class Trainer():

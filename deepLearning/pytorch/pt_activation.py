@@ -5,7 +5,7 @@ import matplotlib.style as style
 
 
 style.use("bmh")
-input = torch.arange(-3, 3.2, 0.2)
+input = torch.arange(-5, 5.2, 0.2)
 
 
 print("== relu ==")
@@ -52,6 +52,18 @@ plt.plot(input, softmax.squeeze(), label='Softmax')
 print("== LogSoftmax ==")
 # log(exp(xi) / sum(exp(x)))
 print(nn.LogSoftmax(dim=1)(input.unsqueeze(0)))
+
+print("== GLU ==")
+print(nn.GLU()(torch.randn(4, 2)))
+
+print("== Hardswish ==")
+# <-3是0，>3是x，其他是x*(x+3)/6
+plt.plot(input, nn.Hardswish()(input), label='Hardswish')
+
+print("== GeGLU ==")
+
+print("== SwiGLU ==")
+# TODO SwiGLU
 
 
 plt.legend()

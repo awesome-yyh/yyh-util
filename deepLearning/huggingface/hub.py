@@ -6,8 +6,9 @@ model_name = "meta-llama/Llama-2-7b-chat-hf"
 
 # 自带下载进度条，下载到指定目录
 downloaded = []
+use_auth_token = "hf_xxx"
 
-snapshot_download(repo_id=model_name, ignore_patterns=["*.h5", "*.ot", "*.msgpack", "*.safetensors", "*onnx*"] + downloaded, local_dir=os.path.join("~/mypython", model_name.replace('/', '-')), local_dir_use_symlinks=False)
+snapshot_download(repo_id=model_name, ignore_patterns=["*.h5", "*.ot", "*.msgpack", "*.safetensors", "*onnx*"] + downloaded, local_dir=os.path.join("~/mypython", model_name.replace('/', '-')), local_dir_use_symlinks=False, use_auth_token=use_auth_token)
 # (推荐) 只下载Pytorch版本的模型, 并指定下载路径, 如果文件已经缓存则直接从缓存文件复制, 要使用local_dir参数需要版本huggingface_hub==0.13.4或以上
 
 # # 只下载指定的文件

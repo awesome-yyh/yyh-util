@@ -49,24 +49,3 @@ encoder_layer = nn.TransformerEncoderLayer(d_model=128, nhead=8, batch_first=Tru
 src = torch.rand(32, 10, 128)
 out = encoder_layer(src)
 print("TransformerEncoderLayer: ", out)
-
-
-print("=== LayerNorm ===")
-batch, sentence_length, embedding_dim = 20, 5, 10
-embedding = torch.randn(batch, sentence_length, embedding_dim)
-layer_norm = nn.LayerNorm(embedding_dim)
-# Activate module
-print(layer_norm(embedding))
-
-
-# an Embedding module containing 10 tensors of size 3
-embedding = nn.Embedding(10, 3)
-# a batch of 2 samples of 4 indices each
-input = torch.LongTensor([[1, 2, 4, 5], [4, 3, 2, 9]])
-embedding(input)
-
-
-print("=== Embedding ===")
-embedding = nn.Embedding(10, 3, padding_idx=0)
-input = torch.LongTensor([[0, 2, 0, 5]])
-embedding(input)
