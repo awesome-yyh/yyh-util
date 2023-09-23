@@ -6,8 +6,8 @@ import torch.nn.functional as F
 torch.random.manual_seed(3)
 
 print("=== MSELoss ===")
-# 输入和Label的均方差
-# loss = mean((x-y)^2)
+# 输出和Label的均方差
+# loss = mean((y-h)^2)
 criterion = nn.MSELoss()
 
 output = torch.randn(3, 5)
@@ -48,9 +48,7 @@ print(criterion(output, target))
 
 print("=== CosineEmbeddingLoss ===")
 # pairwise, 基于余弦相似度衡量两个样本之间的相似性
-# 目标是使相似的样本之间的余弦相似度接近1，不相似的样本之间的余弦相似度接近-1
-# 样本是文本向量、图像向量等
-# 输入相似样本对，并给label=1; 或不相似样本对，并给label=-1
+# 2个样本相似给label1, 不相似给label-1
 # label=1: 1 - cos(x1, x2)
 # label=-1: max(cos(x1, x2)-margin, 0)
 criterion = nn.CosineEmbeddingLoss()
@@ -64,15 +62,13 @@ print(criterion(x1, x2, target))
 
 
 print("=== MarginRankingLoss ===")
-# pairwise, 比较两个样本之间的距离来衡量它们之间的相似性
-# 目标是使相似的样本之间的距离尽可能小，而不相似的样本之间的距离尽可能大
-# 样本是图像之间的欧氏距离、文本之间的编辑距离等
-# y=1时，第一个样本排在前；y=-1时，第二个样本排在前
+# pairwise，2个样本排序的loss
 # loss = max(-y(x1-x2)+margin, 0)
+# y=1时，x1大时loss=0，x1小时loss大，优化目标是使x1 > x2, y=-1时则相反
 criterion = nn.MarginRankingLoss(margin=0.2)
 x1 = torch.tensor([0.8, 0.4, 0.1])
 x2 = torch.tensor([0.6, 0.3, 0.2])
-target = torch.tensor([1, 1, -1])
+target = torch.tensor([-1, -1, 1])
 
 print(criterion(x1, x2, target))
 
@@ -109,7 +105,7 @@ anchor = torch.tensor([[-1.0617, -1.3397, -1.2303],
                       [1.3459, 1.9821, -0.2511]])
 print(criterion(anchor, positive, negative))
 
-nn.TripletMarginWithDistanceLoss
+
 print("=== InfoNCE ===")
 
 
