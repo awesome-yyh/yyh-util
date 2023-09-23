@@ -4,7 +4,7 @@ import torch
 import torch.nn.functional as F
 
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 # pytorch的基本信息
 print("------pytorch的基本信息-------")
