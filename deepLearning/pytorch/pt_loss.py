@@ -39,30 +39,26 @@ output = torch.tensor([-10.0, 10, -10])
 print("loss应该大: ", criterion(output, target))
 
 
-print("=== KLDivLoss ===")
-# KL散度
-criterion = nn.KLDivLoss(reduction="batchmean")
-
-target = torch.tensor([[0.0, 1, 2]])
-output = torch.tensor([[0.0, 1, 2]])
-print("loss应该小: ", criterion(output, target))
-output = torch.tensor([[-10.0, 10, -10]])
-print("loss应该大: ", criterion(output, target))
-
-
 print("=== CosineEmbeddingLoss ===")
 # pairwise, 基于余弦相似度衡量两个样本之间的相似性
 # 2个样本相似给label1, 不相似给label-1
 # label=1: 1 - cos(x1, x2)
 # label=-1: max(cos(x1, x2)-margin, 0)
-criterion = nn.CosineEmbeddingLoss(margin=0.0)
+# 用于比较2个样本之间相似的任务
+criterion = nn.CosineEmbeddingLoss(margin=0)
 
-target = torch.tensor([1, -1])
-x1 = torch.tensor([[0.0, 1, 2], [-10.0, 10, 0]])
-x2 = torch.tensor([[0.0, 1, 2], [10, -10, 0]])
+x1 = torch.tensor([[0.0, 1, 2]])
+x2 = torch.tensor([[0.0, 1, 2]])
+target = torch.tensor([1])
 print("loss应该小: ", criterion(x1, x2, target))
-x1 = torch.tensor([[0.0, 1, 2], [-10.0, 10, 0]])
-x2 = torch.tensor([[0.0, -1, -2], [-10, 10, 0]])
+target = torch.tensor([-1])
+print("loss应该大: ", criterion(x1, x2, target))
+
+x1 = torch.tensor([[10.0, 10, 0]])
+x2 = torch.tensor([[-10.0, -10, 0]])
+target = torch.tensor([-1])
+print("loss应该小: ", criterion(x1, x2, target))
+target = torch.tensor([1])
 print("loss应该大: ", criterion(x1, x2, target))
 
 
@@ -82,9 +78,21 @@ x2 = torch.tensor([0, 2, 7])
 print("loss应该大: ", criterion(x1, x2, target))
 
 
+print("=== KLDivLoss ===")
+# KL散度
+criterion = nn.KLDivLoss(reduction="batchmean")
+
+target = torch.tensor([[0.0, 1, 2]])
+output = torch.tensor([[0.0, 1, 2]])
+print("loss应该小: ", criterion(output, target))
+output = torch.tensor([[-10.0, 10, -10]])
+print("loss应该大: ", criterion(output, target))
+
+
 print("=== TripletMarginWithDistanceLoss ===")
 # Triplet, 正样本和anchor接近, 负样本和anchor远离, 并可自定义距离函数
 # max(d(a,p) - d(a,n) + margin, 0)
+# 用于比较样本之间距离的任务
 
 
 def cosine_distance(x1, x2):
@@ -97,6 +105,7 @@ def cosine_distance(x1, x2):
 criterion = nn.TripletMarginWithDistanceLoss(distance_function=cosine_distance, margin=1.0)
 # distance_function=nn.PairwiseDistance(p=2)  # 与锚点的p范数距离
 # distance_function=cosine_distance # 与锚向量的余弦距离
+# margin为 使得(margin > 正负间距)的最小值
 
 anchor = torch.tensor([[-3.0, -1, 0, 1, 3]])
 positive = torch.tensor([[-3.0, -1, 0, 1, 3]])
@@ -121,7 +130,7 @@ class InfoNCELoss(nn.Module):
         cos_sim = nn.CosineSimilarity(dim=-1)(proj_1.unsqueeze(1), proj_2.unsqueeze(0))
         # InfoNCE loss
         loss = -nn.LogSoftmax(dim=-1)(cos_sim / self.temperature).diag().mean()
-        return cos_sim, loss
+        return loss, cos_sim
 
 
 criterion = InfoNCELoss()

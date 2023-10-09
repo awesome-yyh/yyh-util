@@ -5,12 +5,13 @@ import torch.nn.functional as F
 
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+torch.random.manual_seed(42)
 
 # pytorch的基本信息
 print("------pytorch的基本信息-------")
 print("pytorch version: ", torch.__version__)
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  # linux
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")  # linux
 
 device = torch.device("mps" if torch.backends.mps.is_available() and torch.backends.mps.is_built() else "cpu")  # mac
 
@@ -26,9 +27,9 @@ print("CPU or GPU: ", device)
 
 
 # tensor创建、类型、形状
-print("------ tensor创建、类型、形状 -------")
-torch.random.manual_seed(3)
+print("------ tensor创建、类型、形状、设备 -------")
 t = torch.ones((2, 3, 4))  # torch.float32
+t = torch.zeros((2, 3, 4))  # torch.float32
 t = torch.full([3, 4], 1.5)  # 3行4列，元素全是1.5，torch.float32
 # print(torch.eye(3, device="cuda:0"))  # 单位矩阵
 print(torch.eye(3, device=t.device))  # 单位矩阵
@@ -72,19 +73,23 @@ print(x)
 x = x.roll(shifts=1, dims=0)  # 沿着指定的轴dims，滚动元素shifts次
 print(x)
 
-# tensor拼接(同维度拼接)
-print("------tensor拼接-------")
+# tensor拼接(同维度直接拼接)
+print("------tensor直接拼接-------")
 x = torch.tensor([[1.0, 2.0],
                  [3.0, 4.0]])
 y = torch.tensor([[5.0, 6.0],
                  [7.0, 8.0]])
-z0 = torch.cat((x, y), dim=0)
-z1 = torch.cat((x, y), dim=1)
+z0 = torch.cat((x, y), dim=1)
+z1 = torch.cat((x, y), dim=0)
 print(z0)
 print(z1)
+h0 = torch.hstack((x, y))  # 1.8.0版本之后才有，同cat dim=1
+v0 = torch.vstack((x, y))  # 同cat dim=0
+print(h0)
+print(v0)
 
-# tensor stack(扩张维度后再拼接)
-print("------tensor stack-------")
+# tensor stack(tensor扩张维度后在新的维度拼接)
+print("------tensor扩张维度后在新的维度拼接-------")
 x = torch.tensor([[1.0, 2.0],
                  [3.0, 4.0]])
 y = torch.tensor([[5.0, 6.0],
@@ -187,7 +192,7 @@ print(y.detach().numpy())
 print("------查看模型-------")
 from transformers import BertModel
 
-model_path = "/data/app/yangyahe/base_model/chinese-roberta-wwm-ext"
+model_path = "bert-base-chinese"
 
 model = BertModel.from_pretrained(model_path)
 

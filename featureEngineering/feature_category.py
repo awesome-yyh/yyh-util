@@ -1,46 +1,41 @@
+import csv
 import pandas as pd
-import tensorflow as tf
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import LabelEncoder
+import torch
+import torch.nn as nn
 
 
-# get_dummies: pandas的one-hot encoding
-# 当特征为字符串形式的类别型特征时，比如“Embarked”代表登船口岸
-embarked_oht = pd.get_dummies(df_train[['Embarked']])
-# 当特征为字符串形式的数值型特征时，比如“Pclass”代表船舱等级，其取值为[1,2,3],用数字代表不同等级的船舱，本质上还是类别型特征
-Pclass_oht = pd.get_dummies(df_train['Pclass'].apply(lambda x: str(x)))
+# filename = "data/xxx.csv"
+# df_train = pd.read_csv(filename, sep='\t', encoding='utf_8_sig', header=None, index_col=None, quoting=csv.QUOTE_NONE)
 
-# 或tfrecore解析时做特征工程
-feature_columns = []
+df_train = pd.DataFrame({0: ['A', 'B', 'A', 'C', 'B', 'A']})
 
-# 类别列
-# 注意：所有的Catogorical Column类型最终都要通过indicator_column/embedding_column转换成Dense Column类型才能传入模型！！
-# indicator_column 是一个onehot工具，用于把sparse特征进行onehot 变换
+print("------one-hot(pd)-------")
+embarked_oht = pd.get_dummies(df_train[0])
+Pclass_oht = pd.get_dummies(df_train[0].apply(lambda x: str(x)))  # 先转文本
+print(pd.concat([df_train, Pclass_oht], axis=1))
 
-# categorical_column_with_vocabulary_list 只能用于数量较少的种类，比如性别，省份等。
-sex = tf.feature_column.indicator_column(
-      tf.feature_column.categorical_column_with_vocabulary_list(key='sex', vocabulary_list=["male", "female"]))
-feature_columns.append(sex)
+print("------one-hot(sklearn)-------")
+encoder = OneHotEncoder(sparse_output=False)
+encoded_data = encoder.fit_transform(df_train[[0]])
+encoded_data = pd.DataFrame(encoded_data, columns=encoder.get_feature_names_out(['color']))
+print(encoded_data)
 
-pclass = tf.feature_column.indicator_column(
-      tf.feature_column.categorical_column_with_vocabulary_list(key='pclass', vocabulary_list=[1, 2, 3]))
-feature_columns.append(pclass)
+print("------二进制-------")
 
-embarked = tf.feature_column.indicator_column(
-      tf.feature_column.categorical_column_with_vocabulary_list(key='embarked', vocabulary_list=['S', 'C', 'B']))
-feature_columns.append(embarked)
-
-# categorical_column_with_identity 用于已经事先编码的sparse特征，例如，店铺id虽然数量非常大，但是已经把每个店铺id都从0开始编码
-poi = tf.feature_column.indicator_column(
-    tf.feature_column.categorical_column_with_identity("poi", num_buckets=10, default_value=0))
-feature_columns.append(poi)
+print("------标签-------")
+label_encoder = LabelEncoder()
+encoded_categories = label_encoder.fit_transform(df_train[[0]])
+df_train['Encoded_Category'] = encoded_categories
+print(df_train)
 
 
-# categorical_column_with_hash_bucket 如果sparse特征非常庞大，hash_bucket_size的大小应该留有充分的冗余量，否则非常容易出现hash冲突，在这个例子中，一共有3个店铺，把hash_bucket_size设定为10，仍然得到了hash冲突的结果，这样poi的信息就被丢失了一些信息
-ticket = tf.feature_column.indicator_column(
-     tf.feature_column.categorical_column_with_hash_bucket('ticket', 3))
-feature_columns.append(ticket)
-
-
-# 嵌入列 embedding_column 用于生成embedding后的张量
-cabin = tf.feature_column.embedding_column(
-    tf.feature_column.categorical_column_with_hash_bucket('cabin', 32), dimension=2)
-feature_columns.append(cabin)
+print("------embedding-------")
+torch.random.manual_seed(42)
+num_categories = 108
+embedding_dim = 5
+embedding = nn.Embedding(num_categories, embedding_dim)
+category_feature = torch.LongTensor([1, 63, 75, 22, 63])
+embedded_feature = embedding(category_feature)
+print(embedded_feature)

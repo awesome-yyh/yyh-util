@@ -1,10 +1,14 @@
 import torch
+import torch.nn as nn
 
+
+loss_fn = nn.CrossEntropyLoss()
+model = torch.nn.Linear(10, 2)
 
 print("=== SGD ===")
 optimizer = torch.optim.SGD(model.parameters(), lr=0.1, momentum=0.9)
 optimizer.zero_grad()
-loss_fn(model(input), target).backward()
+loss_fn(model(inputs), targets).backward()
 optimizer.step()
 
 print("=== SGDM ===")

@@ -1,7 +1,9 @@
+import csv
 import pandas as pd
 
 
-df = pd.read_csv('xxx.csv')
+filename = 'xxx.csv'
+df = pd.read_csv(filename, sep='\t', encoding='utf_8_sig', header=None, index_col=None, quoting=csv.QUOTE_NONE, usecols=[0, 1])
 
 print("----缺失值----")
 print(df.isna().any())  # 对各个列的数据，有缺失值对应True，否则对应False
@@ -10,8 +12,10 @@ df['Embarked'] = df['Embarked'].fillna(df['Embarked'].mode()[0])  # 按众数填
 df = df.dropna()  # 删掉含有缺失值的行，默认axis=0
 
 print("----重复值----")
-df.duplicated().sum()  # 统计重复的样本个数
+print("当前总行列数: ", df.shape)
+print("重复的行列数: ", df.duplicated().sum())  # 统计重复的样本个数
 df.drop_duplicates(inplace=True)  # 重复样本删除
+print("当前总行列数: ", df.shape)
 
 print("----异常值----")
 df['salary'].where(df.salary <= 40, 40)  # 将不符合条件的值替换掉成指定值
@@ -30,3 +34,6 @@ df["name"].str.split(',', expand=True, n=1)  # 指定字符串作为拆分点，
 df.Email.str.split('\@|\.', expand=True)  # 使用正则表达式拆分
 
 df.name.str.cat([df.level, df.Email], na_rep='*')  # 多列拼接
+
+
+df.to_csv(filename[:-4] + '_clear.csv', sep='\t', encoding='utf_8_sig', header=False, index=False)
