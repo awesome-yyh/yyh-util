@@ -130,7 +130,8 @@ B = torch.tensor([[5.0, 6.0],
 print(torch.add(A, B))  # [[6,8],[10,12]] 对应位相加
 print(A + B)  # 同上, [[6,8],[10,12]] 对应位相加
 
-print(torch.matmul(A, B))  # [[19,22],[43,50]] 矩阵乘法，对应位相乘并相加
+print(A.mm(B))  # 线性代数中的矩阵乘法
+print(torch.matmul(A, B))  # [[19,22],[43,50]] 矩阵乘法，对应位相乘并相加, mm的broadcast版本
 print(A @ B)  # 同上，[[19,22],[43,50]] 矩阵乘法，对应位相乘并相加
 
 print(torch.mul(A, B))  # [[5,12],[21,32]] 对应位置相乘

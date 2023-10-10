@@ -6,9 +6,12 @@ import torch.nn as nn
 torch.manual_seed(42)
 
 print("=== Embedding ===")
-embedding = nn.Embedding(num_embeddings=5, embedding_dim=3, padding_idx=1)
+embedding = nn.Embedding(num_embeddings=5, embedding_dim=3, padding_idx=1)  # num_embeddings: 输入的种类数，padding_idx处的向量默认全0，训练期间不更新, 通常将padding处的值设为固定0
+padding_idx = 1
+with torch.no_grad():
+    embedding.weight[padding_idx] = torch.ones(3)  # 可以修改padding_idx处的值
 print(embedding.weight)
-print(embedding(torch.tensor([0, 1, 1, 2])))
+print(embedding(torch.LongTensor([0, 1, 1, 2])))
 
 
 print("=== rotary_emb ===")

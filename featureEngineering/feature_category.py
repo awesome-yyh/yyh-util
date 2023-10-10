@@ -36,6 +36,6 @@ torch.random.manual_seed(42)
 num_categories = 108
 embedding_dim = 5
 embedding = nn.Embedding(num_categories, embedding_dim)
-category_feature = torch.LongTensor([1, 63, 75, 22, 63])
+category_feature = torch.LongTensor([[1, 63, 75, 22, 63], [1, 63, 75, 22, 63]])
 embedded_feature = embedding(category_feature)
 print(embedded_feature)
