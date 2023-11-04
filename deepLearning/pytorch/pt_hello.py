@@ -41,6 +41,7 @@ a = torch.FloatTensor([1.0, 3.0])  # 和上面的等价
 print(a.dtype)  # torch.float32
 print(a.int().dtype)  # torch.int32
 print(a.int().float().dtype)  # torch.float32
+# a = a.to(b.dtype)  # a的数据类型改成和b一样的
 
 print("查看形状: ", t.shape)
 print(torch.arange(12).reshape(3, 4))  # 修改形状, 相比torch.view，torch.reshape可以自动处理输入张量不连续的情况
@@ -79,8 +80,8 @@ x = torch.tensor([[1.0, 2.0],
                  [3.0, 4.0]])
 y = torch.tensor([[5.0, 6.0],
                  [7.0, 8.0]])
-z0 = torch.cat((x, y), dim=1)
-z1 = torch.cat((x, y), dim=0)
+z0 = torch.cat((x, y), dim=1)  # 横行拼接
+z1 = torch.cat((x, y), dim=0)  # 纵行拼接
 print(z0)
 print(z1)
 h0 = torch.hstack((x, y))  # 1.8.0版本之后才有，同cat dim=1

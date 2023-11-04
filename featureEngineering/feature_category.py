@@ -31,11 +31,24 @@ df_train['Encoded_Category'] = encoded_categories
 print(df_train)
 
 
+print("种类数(含non)：", len(list(df_train[0])))
+print("各类的个数(从大到小)：\n", df_train[0].value_counts())
+print("种类名(从大到小): ", df_train[0].value_counts().index)
+speech_dic = dict()  # 按出现的频率存为dict
+for index, speech in enumerate(df_train[0].value_counts().index):
+    speech_dic[speech] = index
+print(speech_dic)
+
+df_train['label'] = df_train[[0]].applymap(lambda x: speech_dic.get(x, 100))  # 不在dict中的，即为non的设为100
+
+
 print("------embedding-------")
 torch.random.manual_seed(42)
-num_categories = 108
+num_categories = 101
 embedding_dim = 5
-embedding = nn.Embedding(num_categories, embedding_dim)
-category_feature = torch.LongTensor([[1, 63, 75, 22, 63], [1, 63, 75, 22, 63]])
+embedding = nn.Embedding(num_categories, embedding_dim, padding_idx=100)
+category_feature = torch.LongTensor([[1, 63, 100, 22, 63], [1, 63, 75, 22, 63]])
 embedded_feature = embedding(category_feature)
-print(embedded_feature)
+print(embedded_feature, embedded_feature.shape)
+embedded_feature = embedded_feature.reshape(2, -1)
+print(embedded_feature, embedded_feature.shape)
