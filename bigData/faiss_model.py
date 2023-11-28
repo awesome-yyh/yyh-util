@@ -14,7 +14,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = '2'
 
 
 class FaissModel():
-    def __init__(self, embedding_file, faiss_file=None, sep='\t', rebuild=False) -> None:
+    def __init__(self, embedding_file, faiss_file=None, sep='\t', rebuild=False, gpus=None) -> None:
         # embedding_file: [id] 文本 向量
         self.embedding_file = embedding_file
         self.sep = sep
@@ -29,7 +29,7 @@ class FaissModel():
         self.item2emb = None  # id: 向量, 内部搜索前使用，先根据item找emb
         self.emb_df = None
         self._read_csv()
-        self._create_faiss_model()
+        self._create_faiss_model(gpus=gpus)
     
     def _read_csv(self,):
         print("正在读取embedding文件: ", self.embedding_file)
@@ -65,7 +65,7 @@ class FaissModel():
         faiss.write_index(self.indexModel, self.faiss_file)  # 保存模型
         print(f"faiss索引已保存在: {faiss_file}")
     
-    def _create_faiss_model(self, ):
+    def _create_faiss_model(self, gpus=None):
         if Path(self.faiss_file).exists() and not self.rebuild:
             print("faiss索引文件已存在")
             self._read_faiss_model()
@@ -98,6 +98,14 @@ class FaissModel():
         self.indexModel = faiss.IndexHNSWFlat(dim, 64, measure)  # 第二个参数为构建图时每个点最多连接多少个节点，x越大，构图越复杂，查询越精确，当然构建index时间也就越慢，x取4~64中的任何一个整数
         self.indexModel.hnsw.efSearch = 64  # efSearch越大越准确，但是速度越慢（不支持GPU）
         self.indexModel = faiss.IndexIDMap(self.indexModel)
+        
+        # n_bits = 2 * dim
+        # self.indexModel = faiss.IndexLSH(dim, n_bits)
+        
+        ngpus = faiss.get_num_gpus()
+        print("number of GPUs:", ngpus)
+        if isinstance(gpus, list):
+            self.indexModel = faiss.index_cpu_to_gpus_list(self.indexModel, gpus=gpus)
 
         print(f"is_trained: {self.indexModel.is_trained}")
         if not self.indexModel.is_trained:  # bool类型，用于指示index是否已被训练
