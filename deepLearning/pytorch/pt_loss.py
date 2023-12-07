@@ -40,46 +40,49 @@ print("loss应该大: ", criterion(output, target))
 
 
 print("=== CosineEmbeddingLoss ===")
-# pairwise, 基于余弦相似度衡量两个样本之间的相似性
-# 2个样本相似给label1, 不相似给label-1
-# label=1: 1 - cos(x1, x2)
-# label=-1: max(cos(x1, x2)-margin, 0)
-# 用于比较2个样本之间相似的任务
+# pairwise, 基于余弦相似度来衡量两个样本之间的相似性
+# target=1: 1 - cos(x1, x2)
+# target=-1: max(cos(x1, x2)-margin, 0)
+# 优化目标：当target=1时，让x1和x2相似，当target=-1时，让x1和x2不相似
+# 预测时：二分类：x1和x2相似给label正；x1和x2不相似给label负
 criterion = nn.CosineEmbeddingLoss(margin=0)
 
 x1 = torch.tensor([[0.0, 1, 2]])
 x2 = torch.tensor([[0.0, 1, 2]])
 target = torch.tensor([1])
-print("loss应该小: ", criterion(x1, x2, target))
+print("loss应该小: ", criterion(x1, x2, target), "cos 相似性: ", nn.CosineSimilarity(dim=-1)(x1, x2))
 target = torch.tensor([-1])
-print("loss应该大: ", criterion(x1, x2, target))
+print("loss应该大: ", criterion(x1, x2, target), "cos 相似性: ", nn.CosineSimilarity(dim=-1)(x1, x2))
 
 x1 = torch.tensor([[10.0, 10, 0]])
 x2 = torch.tensor([[-10.0, -10, 0]])
 target = torch.tensor([-1])
-print("loss应该小: ", criterion(x1, x2, target))
+print("loss应该小: ", criterion(x1, x2, target), "cos 相似性: ", nn.CosineSimilarity(dim=-1)(x1, x2))
 target = torch.tensor([1])
-print("loss应该大: ", criterion(x1, x2, target))
+print("loss应该大: ", criterion(x1, x2, target), "cos 相似性: ", nn.CosineSimilarity(dim=-1)(x1, x2))
 
 
 print("=== MarginRankingLoss ===")
 # pairwise，2个样本排序的loss
 # loss = max(-y(x1-x2)+margin, 0)
-# y=1时，x1大时loss=0，x1小时loss大，优化目标是使x1 > x2, y=-1时则相反
-# x1>x2时给label1, x1<x2时给label-1
+# 优化目标：target=1时，让x1>x2; 当target=-1时，让x1<x2
+# 预测时：二分类：x1>x2时给label正, x1<x2时给label负
+
 criterion = nn.MarginRankingLoss(margin=0.0)
 
 target = torch.tensor([-1, -1, 1])
-x1 = torch.tensor([1, 3, 5])
-x2 = torch.tensor([2, 4, 3])
-print("loss应该小: ", criterion(x1, x2, target))
-x1 = torch.tensor([1, 3, 5])
-x2 = torch.tensor([0, 2, 7])
-print("loss应该大: ", criterion(x1, x2, target))
+x1 = torch.tensor([1.0, 3, 5])
+x2 = torch.tensor([2.0, 4, 3])
+print("loss应该小: ", criterion(x1, x2, target), "x1-x2: ", x1 - x2)
+x1 = torch.tensor([1.0, 3, 5])
+x2 = torch.tensor([0.0, 2, 7])
+print("loss应该大: ", criterion(x1, x2, target), "x1-x2: ", x1 - x2)
 
 
 print("=== KLDivLoss ===")
 # KL散度
+# loss = y_true * log(y_true / y_pred)
+# 优化目标：让y_true 和 y_pred相同/信息损失最小
 criterion = nn.KLDivLoss(reduction="batchmean")
 
 target = torch.tensor([[0.0, 1, 2]])
@@ -90,29 +93,30 @@ print("loss应该大: ", criterion(output, target))
 
 
 print("=== TripletMarginWithDistanceLoss ===")
-# Triplet, 正样本和anchor接近, 负样本和anchor远离, 并可自定义距离函数
-# max(d(a,p) - d(a,n) + margin, 0)
-# 用于比较样本之间距离的任务
+# Triplet
+# 优化目标：让正样本和anchor接近, 负样本和anchor远离, 并可自定义距离函数
+# loss = max(d(a,p) - d(a,n) + margin, 0)
+# 预测时：二分类：d(a,p) < d(a,n)时给label正，d(a,p) > d(a,n)时给label负
+# margin：控制正负样本之间的最小距离，margin过大会导致模型过于保守，有效的三元组也难以被正确学习；margin过小可能导致模型过于激进，无效的三元组也被错误地学习
 
+criterion = nn.TripletMarginWithDistanceLoss(distance_function=nn.PairwiseDistance(p=2))  # 与锚点的p范数距离
+anchor = torch.tensor([[-3.0, -1, 0, 1, 3]])
+positive = torch.tensor([[-3.0, -1, 0, 1, 3]])
+negative = torch.tensor([[3.0, 1, 0, -1, -3]])
+print("loss应该小: ", criterion(anchor, positive, negative))
+anchor = torch.tensor([[-3.0, -1, 0, 1, 3]])
+positive = torch.tensor([[3.0, 1.3, 0, -1, -3]])
+negative = torch.tensor([[-3.0, -1, 0, 1, 3]])
+print("loss应该大: ", criterion(anchor, positive, negative))
 
-def cosine_distance(x1, x2):
-    """相似趋于0, 不相似趋于1"""
-    cosine_similarity = nn.CosineSimilarity(dim=-1)  # 余弦相似距离
-    print("cosine_similarity: ", cosine_similarity(x1, x2))
-    return (1 - cosine_similarity(x1, x2)) / 2
-
-
-criterion = nn.TripletMarginWithDistanceLoss(distance_function=cosine_distance, margin=1.0)
-# distance_function=nn.PairwiseDistance(p=2)  # 与锚点的p范数距离
-# distance_function=cosine_distance # 与锚向量的余弦距离
-# margin为 使得(margin > 正负间距)的最小值
+criterion = nn.TripletMarginWithDistanceLoss(distance_function=lambda x, y: 1.0 - F.cosine_similarity(x, y), margin=1.0)  # 余弦相似距离[-1, 1]
 
 anchor = torch.tensor([[-3.0, -1, 0, 1, 3]])
 positive = torch.tensor([[-3.0, -1, 0, 1, 3]])
 negative = torch.tensor([[3.0, 1, 0, -1, -3]])
 print("loss应该小: ", criterion(anchor, positive, negative))
 anchor = torch.tensor([[-3.0, -1, 0, 1, 3]])
-positive = torch.tensor([[3.0, 1, 0, -1, -3]])
+positive = torch.tensor([[3.0, 1.3, 0, -1, -3]])
 negative = torch.tensor([[-3.0, -1, 0, 1, 3]])
 print("loss应该大: ", criterion(anchor, positive, negative))
 

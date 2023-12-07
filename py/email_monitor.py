@@ -52,21 +52,22 @@ class NvidiaSmiMonitor:
             output = process.stdout.decode('utf-8')
             # 使用正则表达式查找显存使用量
             matches = re.findall(r'(\d+)MiB /', output)
-            logging.info(matches)
-            # 计算空闲显卡数量
-            free_count = sum([1 for m in matches if int(m) < self.MEMORY_USAGE])
-            # 如果空闲显卡数量发生改变，则提醒用户
-            if free_count != self.last_free_count:
-                # 发送邮件提醒
-                subject = self.server_name + f"空卡数量变更{self.last_free_count}-->{free_count}"
-                body = self.server_name + f"\n空闲显卡数量: {free_count}\n各卡已用显存分别是: {matches}"
-                self.email.send_email(subject=subject, body=body)
-                logging.info(f"{subject}, {body}")
-                self.last_free_count = free_count
-            # 等待指定的时间间隔，再次运行监控程序
-            time.sleep(self.interval_minutes * 60)
+            if matches:
+                logging.info(matches)
+                # 计算空闲显卡数量
+                free_count = sum([1 for m in matches if int(m) < self.MEMORY_USAGE])
+                # 如果空闲显卡数量发生改变，则提醒用户
+                if free_count != self.last_free_count:
+                    # 发送邮件提醒
+                    subject = self.server_name + f"空卡数量变更{self.last_free_count}-->{free_count}"
+                    body = self.server_name + f"\n空闲显卡数量: {free_count}\n各卡已用显存分别是: {matches}"
+                    self.email.send_email(subject=subject, body=body)
+                    logging.info(f"{subject}, {body}")
+                    self.last_free_count = free_count
+                # 等待指定的时间间隔，再次运行监控程序
+                time.sleep(self.interval_minutes * 60)
 
 
 if __name__ == "__main__":
-    monitor = NvidiaSmiMonitor(server_name="host34", MEMORY_USAGE=18)
+    monitor = NvidiaSmiMonitor(server_name="hostxx", MEMORY_USAGE=18)
     monitor.run()

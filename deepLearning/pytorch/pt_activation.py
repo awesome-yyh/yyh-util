@@ -6,7 +6,7 @@ import seaborn as sns
 
 
 sns.set_style("darkgrid")
-input = torch.arange(-5, 5.2, 0.2)
+input = torch.arange(-5, 5.0, 0.2)
 
 print("== Sigmoid ==")
 # 1 / (1 + exp(-x)), 范围(0,1)
@@ -42,48 +42,40 @@ sns.lineplot(x=input, y=QuickGELU()(input), linestyle='--', label='QuickGELU')
 print("== Softmax ==")
 # exp(xi) / sum(exp(x)), 每个值的范围(0,1), 所有值之和为1
 softmax = nn.Softmax(dim=1)(input.unsqueeze(0))
-print("Softmax sum: ", torch.sum(softmax))
 sns.lineplot(x=input, y=softmax.squeeze(), linestyle=':', label='Softmax')
+print("Softmax sum: ", torch.sum(softmax))
 
 print("== LogSoftmax ==")
 # log(exp(xi) / sum(exp(x)))
-# sns.lineplot(x=input, y=nn.LogSoftmax(dim=1)(input.unsqueeze(0)).squeeze(), linestyle='-.', label='LogSoftmax')
+sns.lineplot(x=input, y=nn.LogSoftmax(dim=1)(input.unsqueeze(0)).squeeze(), linestyle='-.', label='LogSoftmax')
 
 print("== Hardswish ==")
 # <-3是0，>3是x，其他是x*(x+3)/6
 sns.lineplot(x=input, y=nn.Hardswish()(input), linestyle='-.', label='Hardswish')
 
-class _GLUBaseModule(nn.Module):
-    def __init__(self, activation_fn):
-        super().__init__()
-        self.activation_fn = activation_fn
-
-    def forward(self, x):
-        # dim=-1 breaks in jit for pt<1.10
-        x1, x2 = x.chunk(2, dim=(x.ndim - 1))
-        return x1 * self.activation_fn(x2)
-
 
 print("== GLU ==")
-print(nn.GLU()(torch.randn(4, 2)))
-# plt.plot(input, _GLUBaseModule()(input), label='GLU')
+# gated linear unit
+sns.lineplot(nn.GLU()(input), label='GLU')
 
 
-class GEGLU(_GLUBaseModule):
-    def __init__(self):
-        super().__init__(F.gelu)
+class GEGLU(nn.Module):
+    def forward(self, x: torch.Tensor):
+        x = torch.chunk(x, 2, dim=-1)
+        return F.gelu(x[0]) * x[1]
 
 
 print("== GeGLU ==")
-# plt.plot(input, GEGLU()(input), label='GEGLU')
+sns.lineplot(GEGLU()(input), label='GEGLU')
 
 
-class SwiGLU(_GLUBaseModule):
-    def __init__(self):
-        super().__init__(F.silu)
+class SwiGLU(nn.Module):
+    def forward(self, x: torch.Tensor):
+        x = torch.chunk(x, 2, dim=-1)
+        return F.silu(x[0]) * x[1]
 
 
 print("== SwiGLU ==")
-# plt.plot(input, SwiGLU()(input), label='SwiGLU')
+sns.lineplot(SwiGLU()(input), label='SwiGLU')
 
 plt.show()

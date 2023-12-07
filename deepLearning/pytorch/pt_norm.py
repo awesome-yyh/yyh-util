@@ -42,3 +42,5 @@ class RMSNorm(torch.nn.Module):
 
 print("=== RMSNorm ===")
 print(RMSNorm(4)(embedding))
+
+print("=== DeepNorm ===")
