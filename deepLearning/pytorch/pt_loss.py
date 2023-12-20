@@ -109,16 +109,18 @@ positive = torch.tensor([[3.0, 1.3, 0, -1, -3]])
 negative = torch.tensor([[-3.0, -1, 0, 1, 3]])
 print("loss应该大: ", criterion(anchor, positive, negative))
 
-criterion = nn.TripletMarginWithDistanceLoss(distance_function=lambda x, y: 1.0 - F.cosine_similarity(x, y), margin=1.0)  # 余弦相似距离[-1, 1]
+distance_function = lambda x, y: 1.0 - F.cosine_similarity(x, y)
+criterion = nn.TripletMarginWithDistanceLoss(distance_function=distance_function, margin=1.0)  # 余弦相似距离[-1, 1]
 
 anchor = torch.tensor([[-3.0, -1, 0, 1, 3]])
 positive = torch.tensor([[-3.0, -1, 0, 1, 3]])
 negative = torch.tensor([[3.0, 1, 0, -1, -3]])
-print("loss应该小: ", criterion(anchor, positive, negative))
+print("loss应该小: ", criterion(anchor, positive, negative), distance_function(anchor, positive) < distance_function(anchor, negative))
 anchor = torch.tensor([[-3.0, -1, 0, 1, 3]])
 positive = torch.tensor([[3.0, 1.3, 0, -1, -3]])
 negative = torch.tensor([[-3.0, -1, 0, 1, 3]])
-print("loss应该大: ", criterion(anchor, positive, negative))
+print("loss应该大: ", criterion(anchor, positive, negative), distance_function(anchor, positive) > distance_function(anchor, negative))
+
 
 print("=== InfoNCE ===")
 # 2组样本排成矩阵, 对角线相似, 非对角线不相似
