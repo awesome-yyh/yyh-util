@@ -1,6 +1,8 @@
-if __name__ == "__main__":
+from typing import List
+
+try:
     from zlmdb_abc import ZLMDBABC
-else:
+except:
     from .zlmdb_abc import ZLMDBABC
 
 

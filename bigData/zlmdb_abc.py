@@ -8,17 +8,19 @@ class ZLMDBABC(ABC):
     """lmdb 抽象基类
     子类需要实现io方法, 使其传入index后即可读/写
     """
-    def __init__(self, lmdb_path, map_size=int(1e12)):
+    def __init__(self, lmdb_dir, map_size=45, lock=False, max_readers=126):
+        """
+        lmdb_dir: 存储数据库的路径
+        map_size: 单位G, 数据库可能增长到的最大大小
+        """
+        print(f"lmdb_dir: {lmdb_dir}")
+        os.makedirs(lmdb_dir, exist_ok=True)
+        self.db = lmdb.Environment(lmdb_dir, int(map_size * 1024**3), lock=lock, max_readers=max_readers)
         
-        os.makedirs(lmdb_path, exist_ok=True)
-        self.db = lmdb.open(lmdb_path, map_size, lock=False, max_readers=126)
-        
-        self.__len__()
+        self.train_data_len = len(self)
         
     def __len__(self, ):
-        self.train_data_len = int(self._get("train_data_len")) if self._get("train_data_len") else 0
-        
-        return self.train_data_len
+        return int(self._get("train_data_len")) if self._get("train_data_len") else 0
         
     def _put(self, k, v):
         """增加和修改都是这个
