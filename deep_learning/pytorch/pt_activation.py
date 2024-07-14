@@ -1,3 +1,11 @@
+'''
+Author: yyh owyangyahe@126.com
+Date: 2023-08-22 15:44:23
+LastEditors: yyh owyangyahe@126.com
+LastEditTime: 2024-02-18 08:14:30
+FilePath: /mypython/yyh-util/deepLearning/pytorch/pt_activation.py
+Description: 
+'''
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -27,7 +35,7 @@ sns.lineplot(x=input, y=nn.LeakyReLU(negative_slope=1e-2)(input), linestyle='-.'
 
 print("== GELU ==")
 # Gaussian Error Linear Units function
-# GELU = x * f(x)
+# GELU = x * f(x) = x * sigmoid(1.702*x)
 sns.lineplot(x=input, y=nn.GELU()(input), linestyle='-', label='GELU')
 
 

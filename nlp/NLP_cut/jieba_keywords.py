@@ -1,5 +1,14 @@
+'''
+Author: yyh owyangyahe@126.com
+Date: 2022-11-23 21:41:47
+LastEditors: yyh owyangyahe@126.com
+LastEditTime: 2024-06-04 19:31:25
+FilePath: /mypython/yyh-util/nlp/NLP_cut/jieba_keywords.py
+Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+'''
 
-import jieba.analyse
+from jieba import analyse
+
 
 
 doc = '''
@@ -20,12 +29,12 @@ doc = '''
 '''
 
 print("基于TF/IDF")
-keywords = jieba.analyse.extract_tags(doc, topK=10, withWeight=False, allowPOS=())
+keywords = analyse.extract_tags(doc, topK=10, withWeight=False, allowPOS=())
 # topK 为返回几个 TF/IDF 权重最大的关键词，默认值为 20
 # withWeight 为是否一并返回关键词权重值，默认值为 False
 # allowPOS 仅包括指定词性的词，默认值为空，即不筛选, 词性表：https://blog.csdn.net/zhuzuwei/article/details/79029904
 print(keywords)  # ['号线', '重庆', '索道', '解放碑', '崖洞', '磁器', '轨道', '千与千寻', '什字', '长江']
 
 print("基于textrank")
-keywords = jieba.analyse.textrank(doc, topK=10, withWeight=False)
+keywords = analyse.textrank(doc, topK=10, withWeight=False)
 print(keywords)  # ['重庆', '号线', '交通', '轨道', '长江', '旅游景点', '磁器', '游客', '乘坐', '汇总']

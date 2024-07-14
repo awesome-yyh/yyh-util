@@ -45,6 +45,7 @@ print(a.int().float().dtype)  # torch.float32
 
 print("查看形状: ", t.shape)
 print(torch.arange(12).reshape(3, 4))  # 修改形状, 相比torch.view，torch.reshape可以自动处理输入张量不连续的情况
+print(torch.arange(12).reshape(3, 4).view(-1))  # 全部展开成一维
 
 print(torch.transpose(torch.arange(12).reshape(3, 4), dim0=0, dim1=1))  # 只能2个维度之间进行转置
 print(torch.arange(12).reshape(3, 4).permute(1, 0))  # 维度从m*n变成n*m, 对于二维相当于转置，可以一次性进行多个维度的转置
@@ -68,6 +69,15 @@ x = torch.tensor([[1.0, 2.0],
 print(x[-1], x[0:1], x[0, 1].item())
 x[0, 1] = 99  # 原地操作（在原内存地址修改并生效）
 print(x)
+print(torch.index_select(x, dim=0, index=torch.tensor([0, 1])))  # 对输入的tensor进行索引，返回一个新的tensor，沿指定轴，按index进行取数；相比直接[]索引, 这个可以处理更复杂的场景，且效率更高, 要取的元素可以按指定的维度直接取时使用，比如直接取某一行/某一列
+print(torch.gather(x, 1, torch.tensor([[0, 0], [1, 0]])))  # 沿着指定轴收集数据, 逐行或逐列按索引取值, 所取的元素不能行平竖直地取，而是带拐弯的取时使用，Index tensor must have the same number of dimensions as input tensor，这2个返回的tensor和原tensor的维度数量都是一样的（都是m*n*x）,如果需要少一维，用torch.stack拼接
+
+z0 = torch.stack((x[0][3], x[1][8], x[2][5], x[3][11]), dim=0)
+indices = torch.tensor([3, 8, 5, 11])
+iii = 
+for id, v in enumerate(indices):
+    iii += x[id][v]
+
 print("=== roll ===")
 x = torch.tensor([1, 2, 3, 4, 5, 6, 7, 8]).view(4, 2)
 print(x)
