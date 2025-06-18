@@ -1,8 +1,8 @@
 '''
 Author: yyh owyangyahe@126.com
 Date: 2023-09-25 10:53:49
-LastEditors: yyh owyangyahe@126.com
-LastEditTime: 2024-08-24 21:15:50
+LastEditors: yangyahe yangyahe@midu.com
+LastEditTime: 2025-06-18 14:27:59
 FilePath: /mypython/yyh-util/nlp/NLP_cut/pt_cut.py
 Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 '''

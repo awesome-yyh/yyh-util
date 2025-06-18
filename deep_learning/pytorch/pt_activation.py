@@ -6,6 +6,7 @@ LastEditTime: 2024-02-18 08:14:30
 FilePath: /mypython/yyh-util/deepLearning/pytorch/pt_activation.py
 Description: 
 '''
+import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -43,6 +44,13 @@ class QuickGELU(nn.Module):
     def forward(self, x: torch.Tensor):
         return x * torch.sigmoid(1.702 * x)
 
+class NewGELU(nn.Module):
+    """
+    Implementation of the GELU activation function currently in Google BERT repo (identical to OpenAI GPT).
+    Reference: Gaussian Error Linear Units (GELU) paper: https://arxiv.org/abs/1606.08415
+    """
+    def forward(self, x):
+        return 0.5 * x * (1.0 + torch.tanh(math.sqrt(2.0 / math.pi) * (x + 0.044715 * torch.pow(x, 3.0))))
 
 print("== QuickGELU ==")
 sns.lineplot(x=input, y=QuickGELU()(input), linestyle='--', label='QuickGELU')
